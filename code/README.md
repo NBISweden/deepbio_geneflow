@@ -1,0 +1,1 @@
+Main directory to store scripts and snippets

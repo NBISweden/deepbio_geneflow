@@ -1,0 +1,1 @@
+Resource files such as databases, reference genomes etc go here.

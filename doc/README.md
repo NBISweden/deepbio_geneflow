@@ -1,1 +1,0 @@
-Documentation for the project (can also be added directly to the GitHub wiki)

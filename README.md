@@ -2,16 +2,15 @@
 Analyzing gene flow in the deep biosphere via "multi-omics" integrated analysis.
 
 ## Repository organization
-`code/` : scripts and code snippets
+`config/` : configuration files
 
-`data/` : download and store raw data here
+`data/` : raw data goes here
 
-`doc/` : documentation for the project
+`resources/` : databases, references etc.
 
-`notebooks` : Rmarkdown and Jupyter notebooks
+`workflow/` : main directory for the snakemake workflow
 
 ## Data locations
-
 
  ## Tools and outline
  ### Plasmids

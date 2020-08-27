@@ -1,7 +1,5 @@
 from scripts.common import get_assembly_files
 
-localrules: generate_metaspades_input
-
 rule generate_metaspades_input:
     """Generate input files for use with Metaspades"""
     input:

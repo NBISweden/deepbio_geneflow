@@ -1,21 +1,5 @@
 from scripts.common import get_assembly_files
 
-rule generate_metaspades_input:
-    """Generate input files for use with Metaspades"""
-    input:
-        lambda wildcards: get_assembly_files(assemblies[wildcards.assembly], wildcards.R)
-    output:
-        fq = temp(opj("results", "assembly", "{assembly}","{R}.fq"))
-    group: "metaspades"
-    resources:
-        runtime = lambda wildcards, attempt: attempt**2*60*4
-    params:
-        assembly = lambda wildcards: assemblies[wildcards.assembly],
-        R = lambda wildcards: wildcards.R,
-        tmp_out = opj("$TMPDIR", "{assembly}.{R}.fq")
-    script:
-        "../scripts/assembly_utils.py"
-
 rule metaspades:
     input:
         R1 = lambda wildcards: get_assembly_files(assemblies[wildcards.assembly], "R1"),

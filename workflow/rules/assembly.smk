@@ -1,3 +1,5 @@
+from scripts.common import get_assembly_files
+
 localrules: generate_metaspades_input
 
 rule generate_metaspades_input:
@@ -14,31 +16,32 @@ rule generate_metaspades_input:
 
 rule metaspades:
     input:
-        R1=temp(opj("results", "assembly", "{assembly}","R1.fq")),
-        R2=temp(opj("results", "assembly", "{assembly}","R2.fq"))
+        R1=opj("results", "assembly", "{assembly}","R1.fq"),
+        R2=opj("results", "assembly", "{assembly}","R2.fq")
     output:
-        opj("results", "assembly", "{assembly}", "final_contigs.fa")
+        expand(opj("results", "assembly", "{{assembly}}", "{f}.fasta"),
+               f = ["contigs", "scaffolds"]),
+        opj("results", "assembly", "{assembly}", "assembly_graph.fastg")
     log:
         opj("results", "logs", "assembly", "{assembly}.spades.log")
     params:
         tmp=opj("$TMPDIR","{assembly}.metaspades"),
-        output_dir=opj("results", "assembly", "{assembly}")
+        output_dir=lambda wildcards, output: os.path.dirname(output[0])
     threads: 8
     resources:
         runtime=lambda wildcards, attempt: attempt**2*60*4
     conda:
-        "../envs/metaspades.yml"
+        "../envs/metaspades.yaml"
     shell:
         """
         # Create directories
         mkdir -p {params.tmp}
         
         # Run metaspades
-        metaspades.py \
+        spades.py --meta \
             -t {threads} -1 {input.R1} -2 {input.R2} \
             -o {params.tmp} > {log} 2>&1
         
         # Move output from temporary directory        
-        mv {params.tmp}/* {params.output_dir}
-        mv {params.output_dir}/scaffolds.fasta {params.output_dir}/final_contigs.fa       
+        mv {params.tmp}/* {params.output_dir}       
         """

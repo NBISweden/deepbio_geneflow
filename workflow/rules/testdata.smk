@@ -1,5 +1,7 @@
 ##### download example files #####
 
+localrules: download_synthetic
+
 rule download_synthetic:
     """
     Download pre-made synthetic metagenome from Zenodo
@@ -10,7 +12,7 @@ rule download_synthetic:
     log:
         "results/logs/testdata/synthetic.log"
     params:
-        tar = "examples/data/synthetic.tar.gz",
+        tar = "data/synthetic.tar.gz",
         url = "https://zenodo.org/record/3737112/files/synthetic.tar.gz?download=1",
         outdir = lambda wildcards, output: os.path.dirname(output.R1)
     shell:

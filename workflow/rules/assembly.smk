@@ -1,29 +1,32 @@
 from scripts.common import get_assembly_files
 
-localrules: generate_metaspades_input
-
 rule generate_metaspades_input:
     """Generate input files for use with Metaspades"""
     input:
-        lambda wildcards: get_assembly_files(assemblies[wildcards.assembly])
+        lambda wildcards: get_assembly_files(assemblies[wildcards.assembly], wildcards.R)
     output:
-        R1=temp(opj("results", "assembly", "{assembly}","R1.fq")),
-        R2=temp(opj("results", "assembly", "{assembly}","R2.fq"))
+        fq = temp(opj("results", "assembly", "{assembly}","{R}.fq"))
+    group: "metaspades"
+    resources:
+        runtime = lambda wildcards, attempt: attempt**2*60*4
     params:
-        assembly = lambda wildcards: assemblies[wildcards.assembly]
+        assembly = lambda wildcards: assemblies[wildcards.assembly],
+        R = lambda wildcards: wildcards.R,
+        tmp_out = opj("$TMPDIR", "{assembly}.{R}.fq")
     script:
         "../scripts/assembly_utils.py"
 
 rule metaspades:
     input:
-        R1=opj("results", "assembly", "{assembly}","R1.fq"),
-        R2=opj("results", "assembly", "{assembly}","R2.fq")
+        R1 = opj("results", "assembly", "{assembly}","R1.fq"),
+        R2 = opj("results", "assembly", "{assembly}","R2.fq")
     output:
         expand(opj("results", "assembly", "{{assembly}}", "{f}.fasta"),
                f = ["contigs", "scaffolds"]),
         opj("results", "assembly", "{assembly}", "assembly_graph.fastg")
     log:
         opj("results", "logs", "assembly", "{assembly}.spades.log")
+    group: "metaspades"
     params:
         tmp=opj("$TMPDIR","{assembly}.metaspades"),
         output_dir=lambda wildcards, output: os.path.dirname(output[0])

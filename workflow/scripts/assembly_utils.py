@@ -12,20 +12,19 @@ def metaspades_input(sm):
     :return:
     """
     from common import rename_records
-    files = {"R1": [], "R2": []}
+    import shutil
+    files = []
     assembly_dict = sm.params.assembly
     # Collect all files belonging to the assembly group
-    for sample in assembly_dict.keys():
-        for unit in assembly_dict[sample]:
-            for pair in assembly_dict[sample][unit].keys():
-                files[pair].append(
-                    assembly_dict[sample][unit][pair][0])
+    for sample in sorted(assembly_dict.keys()):
+        for unit in sorted(assembly_dict[sample]):
+            f = assembly_dict[sample][unit][sm.params.R][0]
+            files.append(f)
     # Rename and concatenate reads (required for Metaspades)
-    with open(sm.output.R1, 'w') as fh1, open(sm.output.R2, 'w') as fh2:
-        for i, f in enumerate(files["R1"]):
-            f2 = files["R2"][i]
-            fh1 = rename_records(f, fh1, i)
-            fh2 = rename_records(f2, fh2, i)
+    with open(sm.params.tmp_out, 'w') as fh:
+        for i, f in enumerate(files):
+            fh = rename_records(f, fh, i)
+    shutil.move(sm.params.tmp_out, sm.output.fq)
 
 
 def main(sm):

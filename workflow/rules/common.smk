@@ -31,18 +31,13 @@ wildcard_constraints:
 
 rule link_samples:
     input:
-        R1 = lambda wildcards: samples[wildcards.sample][wildcards.unit]["R1"],
-        R2 = lambda wildcards: samples[wildcards.sample][wildcards.unit]["R2"]
+        lambda wildcards: samples[wildcards.sample][wildcards.unit][wildcards.R],
     output:
-        R1 = opj("data", "stage", "{sample}_{unit}_R1.fastq.gz"),
-        R2 = opj("data", "stage", "{sample}_{unit}_R2.fastq.gz")
+        opj("results", "stage", "{sample}_{unit}_{R}.fastq.gz")
     params:
-        abs_R1_in = lambda wildcards, input: os.path.abspath(input.R1),
-        abs_R2_in = lambda wildcards, input: os.path.abspath(input.R2),
-        abs_R1_out = lambda wildcards, output: os.path.abspath(output.R1),
-        abs_R2_out = lambda wildcards, output: os.path.abspath(output.R2)
+        abs_in = lambda wildcards, input: os.path.abspath(input[0]),
+        abs_out = lambda wildcards, output: os.path.abspath(output[0]),
     shell:
         """
-        ln -s {params.abs_R1_in} {params.abs_R1_out}
-        ln -s {params.abs_R2_in} {params.abs_R2_out}
+        ln -s {params.abs_in} {params.abs_out}
         """

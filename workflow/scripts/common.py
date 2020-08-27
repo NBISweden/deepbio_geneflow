@@ -44,3 +44,20 @@ def get_assembly_files(assembly_dict):
             for pair in assembly_dict[sample][unit].keys():
                 files.append(assembly_dict[sample][unit][pair][0])
     return files
+
+
+def rename_records(f, fh, i):
+    """
+    Prepends a number to read ids
+
+    :param f: Input fastq file (gzipped)
+    :param fh: Output filehandle
+    :param i: File index to prepend to reads
+    :return: Output filehandle
+    """
+    from Bio import SeqIO
+    import gzip as gz
+    for record in SeqIO.parse(gz.open(f, 'rt'), 'fastq'):
+        record.id = "{}_{}".format(i, record.id)
+        SeqIO.write(record, fh, "fastq")
+    return fh

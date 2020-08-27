@@ -39,12 +39,11 @@ def parse_samples(df):
     return samples, assemblies
 
 
-def get_assembly_files(assembly_dict):
+def get_assembly_files(assembly_dict, R):
     files = []
     for sample in assembly_dict.keys():
         for unit in assembly_dict[sample].keys():
-            for pair in assembly_dict[sample][unit].keys():
-                files.append(assembly_dict[sample][unit][pair][0])
+            files.append(assembly_dict[sample][unit][R][0])
     return files
 
 

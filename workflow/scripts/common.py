@@ -21,8 +21,8 @@ def parse_samples(df):
         samples[sample][unit]["R2"] = df.iloc[i]["fq2"]
 
         # Set staged file paths
-        r1 = opj("data", "stage", "{}_{}_R1.fastq.gz".format(sample, unit))
-        r2 = opj("data", "stage", "{}_{}_R2.fastq.gz".format(sample, unit))
+        r1 = opj("results", "stage", "{}_{}_R1.fastq.gz".format(sample, unit))
+        r2 = opj("results", "stage", "{}_{}_R2.fastq.gz".format(sample, unit))
 
         # Initiate keys for all assembly group values
         assem_list = df.iloc[i]["assembly"].split(",")
@@ -32,6 +32,8 @@ def parse_samples(df):
                 assemblies[a] = {}
             if sample not in assemblies[a].keys():
                 assemblies[a][sample] = {unit: {}}
+            if unit not in assemblies[a][sample].keys():
+                assemblies[a][sample][unit] = {}
             assemblies[a][sample][unit]["R1"] = [r1]
             assemblies[a][sample][unit]["R2"] = [r2]
     return samples, assemblies

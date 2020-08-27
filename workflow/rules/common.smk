@@ -1,3 +1,4 @@
+localrules: link_samples
 from snakemake.utils import validate
 import pandas as pd
 import platform

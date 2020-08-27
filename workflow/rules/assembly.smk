@@ -6,7 +6,6 @@ rule generate_metaspades_input:
         lambda wildcards: get_assembly_files(assemblies[wildcards.assembly], wildcards.R)
     output:
         fq = temp(opj("results", "assembly", "{assembly}","{R}.fq"))
-    group: "metaspades"
     resources:
         runtime = lambda wildcards, attempt: attempt**2*60*4
     params:
@@ -26,7 +25,6 @@ rule metaspades:
         opj("results", "assembly", "{assembly}", "assembly_graph.fastg")
     log:
         opj("results", "logs", "assembly", "{assembly}.spades.log")
-    group: "metaspades"
     params:
         tmp=opj("$TMPDIR","{assembly}.metaspades"),
         output_dir=lambda wildcards, output: os.path.dirname(output[0])

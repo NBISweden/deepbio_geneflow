@@ -31,7 +31,7 @@ wildcard_constraints:
 
 rule link_samples:
     input:
-        lambda wildcards: samples[wildcards.sample][wildcards.unit][wildcards.R],
+        lambda wildcards: samples[wildcards.sample][wildcards.unit][wildcards.R]
     output:
         opj("results", "stage", "{sample}_{unit}_{R}.fastq.gz")
     params:

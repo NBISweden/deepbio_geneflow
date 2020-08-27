@@ -1,0 +1,15 @@
+$schema: "http://json-schema.org/draft-06/schema#"
+
+description: snakemake configuration file
+
+type: object
+
+properties:
+  sample_list:
+    type: string
+    description: path to a sample sheet
+    default: "config/samples.tsv"
+  example_dataset_size:
+    type: integer
+    description: number of reads to generate for test data
+    default: 10000

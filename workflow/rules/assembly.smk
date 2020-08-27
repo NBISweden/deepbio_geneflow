@@ -10,7 +10,6 @@ rule metaspades:
         opj("results", "assembly", "{assembly}", "assembly_graph.fastg")
     log:
         opj("results", "logs", "assembly", "{assembly}.spades.log")
-    group: "metaspades"
     params:
         tmp=opj("$TMPDIR","{assembly}.metaspades"),
         output_dir=lambda wildcards, output: os.path.dirname(output[0])
@@ -35,6 +34,6 @@ rule metaspades:
         
         # Clean up input files
         rm {params.tmp}/R1.fq {params.tmp}/R2.fq
-        # Move output from temporary directory        
-        mv {params.tmp}/* {params.output_dir} 
+        # Move output from temporary directory
+        mv {params.tmp}/* {params.output_dir}       
         """

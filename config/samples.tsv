@@ -1,0 +1,3 @@
+sample	unit	assembly	fq1	fq2
+sample1	1	sample1,all	data/testdata/sample1_1_R1.fastq.gz	data/testdata/sample1_1_R2.fastq.gz
+sample2	1	sample2,all	data/testdata/sample2_22_R1.fastq.gz	data/testdata/sample2_22_R2.fastq.gz

@@ -11,7 +11,6 @@ import slurm_utils
 # cookiecutter arguments
 SBATCH_DEFAULTS = """"""
 CLUSTER_CONFIG = "../config/cluster.yaml"
-ADVANCED_ARGUMENT_CONVERSION = {"yes": True, "no": False}["yes"]
 
 RESOURCE_MAPPING = {
     "time": ("time", "runtime", "walltime"),
@@ -45,8 +44,7 @@ sbatch_options.update(cluster_config.get(job_properties.get("rule"), {}))
 sbatch_options.update(job_properties.get("cluster", {}))
 
 # 6) Advanced conversion of parameters
-if ADVANCED_ARGUMENT_CONVERSION:
-    sbatch_options = slurm_utils.advanced_argument_conversion(sbatch_options)
+sbatch_options = slurm_utils.advanced_argument_conversion(sbatch_options)
 
 #7) Format pattern in snakemake style
 sbatch_options = slurm_utils.format_values(sbatch_options, job_properties)

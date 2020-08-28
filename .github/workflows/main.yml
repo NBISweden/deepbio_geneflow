@@ -28,6 +28,6 @@ jobs:
     - uses: actions/checkout@v2
     - uses: s-weigand/setup-conda@v1
     - name: Install the conda environment
-      run: conda env update -n base -f environment.yml
+      run: conda env update -n base -f environment.yaml
     - name: Dry-run
       run: snakemake --use-conda -j 8 -n

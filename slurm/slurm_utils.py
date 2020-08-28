@@ -153,13 +153,8 @@ def advanced_argument_conversion(arg_dict):
         adjusted_args["constraint"] = "mem256GB"
     elif mem > 256000:
         adjusted_args["constraint"] = "mem1TB"
-    # Determine partition with features. If no constraints have been set,
-    # select the partition with lowest memory
     try:
         config = _get_cluster_configuration(partition)
-        mem_feat = _get_features_and_memory(partition)
-        MEMORY_PER_PARTITION = _get_available_memory(mem_feat, constraint)
-        MEMORY_PER_CPU = MEMORY_PER_PARTITION / int(config["cpus"])
     except Exception as e:
         print(e)
         raise e

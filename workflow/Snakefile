@@ -4,6 +4,7 @@
 include: "rules/common.smk"
 include: "rules/testdata.smk"
 include: "rules/assembly.smk"
+include: "rules/plasmids.smk"
 
 report: "report/workflow.rst"
 
@@ -13,5 +14,5 @@ singularity: "docker://continuumio/miniconda3:4.8.2"
 
 rule all:
     input:
-        expand(opj("results", "assembly", "{assembly}", "scaffolds.fasta"),
+        expand(opj("results", "scapp", "{assembly}", "scapp.done"),
                assembly = assemblies.keys())

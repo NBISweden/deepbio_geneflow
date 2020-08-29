@@ -9,6 +9,10 @@ properties:
     type: string
     description: path to a sample sheet
     default: "config/samples.tsv"
+  project:
+    type: string
+    description: project id to use for Slurm workload manager
+    default: "staff"
   example_dataset_size:
     type: integer
     description: number of reads to generate for test data

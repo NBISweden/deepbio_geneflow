@@ -1,3 +1,4 @@
+localrules: link_samples
 from snakemake.utils import validate
 import pandas as pd
 import platform
@@ -31,9 +32,9 @@ wildcard_constraints:
 
 rule link_samples:
     input:
-        lambda wildcards: samples[wildcards.sample][wildcards.unit][wildcards.R],
+        lambda wildcards: samples[wildcards.sample][wildcards.unit][wildcards.R]
     output:
-        opj("results", "stage", "{sample}_{unit}_{R}.fastq.gz")
+        temp(opj("results", "stage", "{sample}_{unit}_{R}.fastq.gz"))
     params:
         abs_in = lambda wildcards, input: os.path.abspath(input[0]),
         abs_out = lambda wildcards, output: os.path.abspath(output[0]),

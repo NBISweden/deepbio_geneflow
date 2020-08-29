@@ -24,6 +24,13 @@ jobscript = slurm_utils.parse_jobscript()
 job_properties = read_job_properties(jobscript)
 
 sbatch_options = {}
+
+# attempt to set account from job properties
+try:
+    account = job_properties.get("params")["account"]
+except KeyError:
+    account = "staff"
+
 cluster_config = slurm_utils.load_cluster_config(CLUSTER_CONFIG)
 
 # 1) sbatch default arguments
@@ -52,6 +59,9 @@ sbatch_options = slurm_utils.format_values(sbatch_options, job_properties)
 # ensure sbatch output dirs exist
 for o in ("output", "error"):
     slurm_utils.ensure_dirs_exist(sbatch_options[o]) if o in sbatch_options else None
+
+# set account
+sbatch_options["account"] = account
 
 # submit job and echo id back to Snakemake (must be the only stdout)
 print(slurm_utils.submit_job(jobscript, **sbatch_options))

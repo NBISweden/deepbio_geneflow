@@ -2,7 +2,7 @@
 """
 Snakemake SLURM submit script.
 """
-import warnings  # use warnings.warn() rather than print() to output info in this script
+# use warnings.warn() rather than print() to output info in this script
 
 from snakemake.utils import read_job_properties
 

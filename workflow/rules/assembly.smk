@@ -12,7 +12,8 @@ rule metaspades:
         opj("results", "logs", "assembly", "{assembly}.spades.log")
     params:
         tmp=opj("$TMPDIR","{assembly}.metaspades"),
-        output_dir=lambda wildcards, output: os.path.dirname(output[0])
+        output_dir=lambda wildcards, output: os.path.dirname(output[0]),
+        account=config["project"]
     threads: 20
     resources:
         runtime=lambda wildcards, attempt: attempt**2*60*8

@@ -15,8 +15,7 @@ rule metaspades:
         output_dir=lambda wildcards, output: os.path.dirname(output[0])
     threads: 20
     resources:
-        runtime=lambda wildcards, attempt: attempt**2*60*8,
-        mem_mb=lambda wildcards, attempt: attempt*128000
+        runtime=lambda wildcards, attempt: attempt**2*60*8
     conda:
         "../envs/metaspades.yaml"
     shell:

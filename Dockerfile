@@ -15,7 +15,7 @@ RUN apt-get update && \
 COPY environment.yaml .
 
 # Install environment into base
-RUN conda env update -n base -f environment.yml && conda clean -a
+RUN conda env update -n base -f environment.yaml && conda clean -a
 
 # Set start up
 CMD ["/bin/bash"]

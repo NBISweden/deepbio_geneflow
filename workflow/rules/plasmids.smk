@@ -1,6 +1,6 @@
 rule scapp:
     input:
-        graph = opj("results", "assembly", "{assembly}", "assembly_graph.fastg"),
+        graph = opj("results", "assembly", "{assembly}", "assembly_graph.fastg.gz"),
         R1 = lambda wildcards: get_assembly_files(assemblies[wildcards.assembly], "R1"),
         R2 = lambda wildcards: get_assembly_files(assemblies[wildcards.assembly], "R2"),
         log = opj("results", "logs", "assembly", "{assembly}.spades.log")
@@ -26,8 +26,11 @@ rule scapp:
         gunzip -c {input.R1} > {params.tmpdir}/R1.fq
         gunzip -c {input.R2} > {params.tmpdir}/R2.fq
         
+        # Unzip graph
+        gunzip -c {input.graph} > {params.tmpdir}/graph.fastg
+        
         # Run SCAPP
-        scapp -p {threads} -g {input.graph} \
+        scapp -p {threads} -g {params.tmpdir}/graph.fastg \
             -r1 {params.tmpdir}/R1.fq -r2 {params.tmpdir}/R2.fq \
             -o {params.outdir}
         """

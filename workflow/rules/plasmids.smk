@@ -6,6 +6,8 @@ rule scapp:
         log = opj("results", "logs", "assembly", "{assembly}.spades.log")
     output:
         touch(opj("results", "scapp", "{assembly}", "scapp.done"))
+    log:
+        opj("results", "logs", "plasmids", "{assembly}.scapp.log")
     conda:
         "../envs/scapp.yaml"
     threads: 4
@@ -20,7 +22,7 @@ rule scapp:
         mkdir -p {params.tmpdir}
         
         # Extract max kmer from spades log
-        egrep -A 1 "^Assembly parameters:" {input.log} | grep "k:" | egrep -o "[0-9]+\]" | sed 's/]//g'
+        k=$(egrep -A 1 "^Assembly parameters:" {input.log} | grep "k:" | egrep -o "[0-9]+\]" | sed 's/]//g')
          
         # Concatenate input reads
         gunzip -c {input.R1} > {params.tmpdir}/R1.fq
@@ -30,7 +32,7 @@ rule scapp:
         gunzip -c {input.graph} > {params.tmpdir}/graph.fastg
         
         # Run SCAPP
-        scapp -p {threads} -g {params.tmpdir}/graph.fastg \
+        scapp -p {threads} -g {params.tmpdir}/graph.fastg -k $k \
             -r1 {params.tmpdir}/R1.fq -r2 {params.tmpdir}/R2.fq \
-            -o {params.outdir}
+            -o {params.outdir} > {log} 2>&1
         """

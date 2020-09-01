@@ -15,7 +15,8 @@ rule scapp:
         runtime = lambda wildcards, attempt: attempt**2*60*4
     params:
         outdir = lambda wildcards, output: os.path.dirname(output[0]),
-        tmpdir = opj("$TMPDIR", "scapp.{assembly}")
+        tmpdir = opj("$TMPDIR", "scapp.{assembly}"),
+        account = config["project"]
     shell:
         """
         # Create tmpdir

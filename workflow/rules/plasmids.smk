@@ -1,8 +1,84 @@
-rule scapp:
+rule make_fasta_from_fastg:
     input:
-        graph = opj("results", "assembly", "{assembly}", "assembly_graph.fastg.gz"),
+        opj("results", "assembly", "{assembly}", "assembly_graph.fastg.gz")
+    output:
+        opj("results", "assembly", "{assembly}", "assembly_graph.nodes.fasta")
+    params:
+        tmp = opj("$TMPDIR", "{assembly}.fastg2fasta"),
+        fastg = opj("$TMPDIR", "{assembly}.fastg2fasta", "assembly_graph.fastg")
+    resources:
+        runtime = lambda wildcards, attempt: attempt**2*60
+    conda:
+        "../envs/recycler.yaml"
+    shell:
+        """
+        mkdir -p {params.tmp}
+        gunzip -c {input[0]} > {params.fastg}
+        make_fasta_from_fastg.py -g {params.fastg} -o {output[0]}
+        rm -r {params.tmp}
+        """
+
+rule bwa_index:
+    input:
+        opj("results", "assembly", "{assembly}", "assembly_graph.nodes.fasta")
+    output:
+        expand(opj("results", "assembly", "{{assembly}}",
+                   "assembly_graph.nodes.fasta.{s}"),
+               s = ["amb", "ann", "bwt", "pac", "sa"])
+    log:
+        opj("results", "logs", "plasmids", "{assembly}.bwa_index.log")
+    conda:
+        "../envs/bwa.yaml"
+    shell:
+        """
+        bwa index {input[0]} > {log} 2>&1
+        """
+
+rule bwa_mem:
+    input:
+        fasta = opj("results", "assembly", "{assembly}", "assembly_graph.nodes.fasta"),
         R1 = lambda wildcards: get_assembly_files(assemblies[wildcards.assembly], "R1"),
         R2 = lambda wildcards: get_assembly_files(assemblies[wildcards.assembly], "R2"),
+        index = expand(opj("results", "assembly", "{{assembly}}",
+                   "assembly_graph.nodes.fasta.{s}"),
+               s = ["amb", "ann", "bwt", "pac", "sa"])
+    output:
+        opj("results", "assembly", "{assembly}", "reads_pe_primary.sort.bam"),
+        opj("results", "assembly", "{assembly}", "reads_pe_primary.sort.bam.bai")
+    log:
+        opj("results", "logs", "plasmids", "{assembly}.bwa.log")
+    params:
+        tmp = opj("$TMPDIR", "{assembly}.bwa"),
+        R1 = opj("$TMPDIR", "{assembly}.bwa", "R1.fastq"),
+        R2 = opj("$TMPDIR", "{assembly}.bwa", "R2.fastq"),
+        outdir = lambda wildcards, output: os.path.dirname(output[0])
+    threads: 4
+    resources:
+        runtime = lambda wildcards, attempt: attempt**2*60*4
+    conda:
+        "../envs/bwa.yaml"
+    shell:
+        """
+        mkdir -p {params.tmp}
+        
+        # Concatenate input
+        gunzip -c {input.R1} > {params.R1}
+        gunzip -c {input.R2} > {params.R2}
+        
+        # Map with bwa
+        bwa mem -t {threads} {input.fasta} {params.R1} {params.R2} 2>{log} | \
+            samtools view -buS - | samtools view -bF 0x0900 - | \
+            samtools sort - > {params.tmp}/reads_pe_primary.sort.bam 
+        # Index
+        samtools index {params.tmp}/reads_pe_primary.sort.bam
+        mv {params.tmp}/reads_pe_primary.sort.bam* {params.outdir}
+        """
+
+rule scapp:
+    input:
+        fa = opj("results", "assembly", "{assembly}", "assembly_graph.nodes.fasta"),
+        bam = opj("results", "assembly", "{assembly}", "reads_pe_primary.sort.bam"),
+        bai = opj("results", "assembly", "{assembly}", "reads_pe_primary.sort.bam.bai"),
         log = opj("results", "logs", "assembly", "{assembly}.spades.log")
     output:
         touch(opj("results", "scapp", "{assembly}", "scapp.done"))
@@ -15,7 +91,7 @@ rule scapp:
         runtime = lambda wildcards, attempt: attempt**2*60*4
     params:
         outdir = lambda wildcards, output: os.path.dirname(output[0]),
-        tmpdir = opj("$TMPDIR", "scapp.{assembly}"),
+        tmpdir = opj("$TMPDIR", "{assembly}.scapp"),
         account = config["project"]
     shell:
         """
@@ -24,18 +100,10 @@ rule scapp:
         
         # Extract max kmer from spades log
         k=$(egrep -A 1 "^Assembly parameters:" {input.log} | grep "k:" | egrep -o "[0-9]+\]" | sed 's/]//g')
-         
-        # Concatenate input reads
-        gunzip -c {input.R1} > {params.tmpdir}/R1.fq
-        gunzip -c {input.R2} > {params.tmpdir}/R2.fq
-        
-        # Unzip graph
-        gunzip -c {input.graph} > {params.tmpdir}/graph.fastg
         
         # Run SCAPP
-        scapp -p {threads} -g {params.tmpdir}/graph.fastg -k $k \
-            -r1 {params.tmpdir}/R1.fq -r2 {params.tmpdir}/R2.fq \
-            -o {params.outdir} > {log} 2>&1
+        scapp -p {threads} -g {input.fa} -k $k \
+            -b {input.bam} -o {params.outdir} > {log} 2>&1
         """
 
 rule mpspades:
@@ -79,86 +147,10 @@ rule mpspades:
         rm -r {params.tmp}
         """
 
-rule make_fasta_from_fastg:
-    input:
-        opj("results", "assembly", "{assembly}", "assembly_graph.fastg.gz")
-    output:
-        opj("results", "recycler", "{assembly}", "assembly_graph.nodes.fasta")
-    params:
-        tmp = opj("$TMPDIR", "{assembly}.recycler"),
-        fastg = opj("$TMPDIR", "{assembly}.recycler", "assembly_graph.fastg")
-    resources:
-        runtime = lambda wildcards, attempt: attempt**2*60
-    conda:
-        "../envs/recycler.yaml"
-    shell:
-        """
-        mkdir -p {params.tmp}
-        gunzip -c {input[0]} > {params.fastg}
-        make_fasta_from_fastg.py -g {params.fastg} -o {output[0]}
-        rm -r {params.tmp}
-        """
-
-rule recycler_index:
-    input:
-        opj("results", "recycler", "{assembly}", "assembly_graph.nodes.fasta")
-    output:
-        expand(opj("results", "recycler", "{{assembly}}",
-                   "assembly_graph.nodes.fasta.{s}"),
-               s = ["amb", "ann", "bwt", "pac", "sa"])
-    log:
-        opj("results", "logs", "plasmids", "{assembly}.bwa_index.log")
-    conda:
-        "../envs/recycler.yaml"
-    shell:
-        """
-        bwa index {input[0]} > {log} 2>&1
-        """
-
-rule recycler_map:
-    input:
-        fasta = opj("results", "recycler", "{assembly}", "assembly_graph.nodes.fasta"),
-        R1 = lambda wildcards: get_assembly_files(assemblies[wildcards.assembly], "R1"),
-        R2 = lambda wildcards: get_assembly_files(assemblies[wildcards.assembly], "R2"),
-        index = expand(opj("results", "recycler", "{{assembly}}",
-                   "assembly_graph.nodes.fasta.{s}"),
-               s = ["amb", "ann", "bwt", "pac", "sa"])
-    output:
-        opj("results", "recycler", "{assembly}", "reads_pe_primary.sort.bam"),
-        opj("results", "recycler", "{assembly}", "reads_pe_primary.sort.bam.bai")
-    log:
-        opj("results", "logs", "plasmids", "{assembly}.bwa.log")
-    params:
-        tmp = opj("$TMPDIR", "{assembly}.recycler"),
-        R1 = opj("$TMPDIR", "{assembly}.recycler", "R1.fastq"),
-        R2 = opj("$TMPDIR", "{assembly}.recycler", "R2.fastq"),
-        outdir = lambda wildcards, output: os.path.dirname(output[0])
-    threads: 4
-    resources:
-        runtime = lambda wildcards, attempt: attempt**2*60*4
-    conda:
-        "../envs/recycler.yaml"
-    shell:
-        """
-        mkdir -p {params.tmp}
-        
-        # Concatenate input
-        gunzip -c {input.R1} > {params.R1}
-        gunzip -c {input.R2} > {params.R2}
-        
-        # Map with bwa
-        bwa mem -t {threads} {input.fasta} {params.R1} {params.R2} 2>{log} | \
-            samtools view -buS - | samtools view -bF 0x0800 - | \
-            samtools sort - > {params.tmp}/reads_pe_primary.sort.bam 
-        # Index
-        samtools index {params.tmp}/reads_pe_primary.sort.bam
-        mv {params.tmp}/reads_pe_primary.sort.bam* {params.outdir}
-        """
-
 rule recycler:
     input:
-        bam = opj("results", "recycler", "{assembly}", "reads_pe_primary.sort.bam"),
-        bai = opj("results", "recycler", "{assembly}", "reads_pe_primary.sort.bam.bai"),
+        bam = opj("results", "assembly", "{assembly}", "reads_pe_primary.sort.bam"),
+        bai = opj("results", "assembly", "{assembly}", "reads_pe_primary.sort.bam.bai"),
         log = opj("results", "logs", "assembly", "{assembly}.spades.log"),
         graph = opj("results", "assembly", "{assembly}", "assembly_graph.fastg.gz")
     output:

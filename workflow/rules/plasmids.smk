@@ -81,7 +81,7 @@ rule scapp:
         bai = opj("results", "assembly", "{assembly}", "reads_pe_primary.sort.bam.bai"),
         kmer = opj("results", "assembly", "{assembly}", "kmer")
     output:
-        touch(opj("results", "scapp", "{assembly}", "done"))
+        touch(opj("results", "scapp", "{assembly}", "assembly_graph.confident_cycs.fasta"))
     log:
         opj("results", "logs", "plasmids", "{assembly}.scapp.log")
     conda:
@@ -95,6 +95,7 @@ rule scapp:
         account = config["project"]
     shell:
         """
+        set +e
         # Create tmpdir
         mkdir -p {params.tmpdir}
         
@@ -107,6 +108,11 @@ rule scapp:
         # Run SCAPP
         scapp -p {threads} -g {params.tmpdir}/assembly_graph.fastg -k $k \
             -b {input.bam} -o {params.outdir} > {log} 2>&1
+        exitcode=$?
+        if [ $exitcode -eq 1 ]
+        then
+            echo "NO PLASMIDS FOUND" > {output[0]}
+        fi 
         """
 
 rule mpspades:

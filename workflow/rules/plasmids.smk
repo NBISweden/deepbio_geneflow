@@ -76,12 +76,12 @@ rule bwa_mem:
 
 rule scapp:
     input:
-        fa = opj("results", "assembly", "{assembly}", "assembly_graph.nodes.fasta"),
+        fastg = opj("results", "assembly", "{assembly}", "assembly_graph.fastg.gz"),
         bam = opj("results", "assembly", "{assembly}", "reads_pe_primary.sort.bam"),
         bai = opj("results", "assembly", "{assembly}", "reads_pe_primary.sort.bam.bai"),
-        log = opj("results", "logs", "assembly", "{assembly}.spades.log")
+        kmer = opj("results", "assembly", "{assembly}", "kmer")
     output:
-        touch(opj("results", "scapp", "{assembly}", "scapp.done"))
+        touch(opj("results", "scapp", "{assembly}", "done"))
     log:
         opj("results", "logs", "plasmids", "{assembly}.scapp.log")
     conda:
@@ -98,11 +98,14 @@ rule scapp:
         # Create tmpdir
         mkdir -p {params.tmpdir}
         
-        # Extract max kmer from spades log
-        k=$(egrep -A 1 "^Assembly parameters:" {input.log} | grep "k:" | egrep -o "[0-9]+\]" | sed 's/]//g')
+        # Unzip fastg
+        gunzip -c {input.fastg} > {params.tmpdir}/assembly_graph.fastg
+        
+        # Get kmer size
+        k=$(cat {input.kmer})
         
         # Run SCAPP
-        scapp -p {threads} -g {input.fa} -k $k \
+        scapp -p {threads} -g {params.tmpdir}/assembly_graph.fastg -k $k \
             -b {input.bam} -o {params.outdir} > {log} 2>&1
         """
 
@@ -151,7 +154,7 @@ rule recycler:
     input:
         bam = opj("results", "assembly", "{assembly}", "reads_pe_primary.sort.bam"),
         bai = opj("results", "assembly", "{assembly}", "reads_pe_primary.sort.bam.bai"),
-        log = opj("results", "logs", "assembly", "{assembly}.spades.log"),
+        kmer = opj("results", "assembly", "{assembly}", "kmer"),
         graph = opj("results", "assembly", "{assembly}", "assembly_graph.fastg.gz")
     output:
         touch(opj("results", "recycler", "{assembly}", "done"))
@@ -167,8 +170,7 @@ rule recycler:
         """
         mkdir -p {params.tmp}
         gunzip -c {input.graph} > {params.graph}
-        # Extract max kmer from spades log
-        k=$(egrep -A 1 "^Assembly parameters:" {input.log} | grep "k:" | egrep -o "[0-9]+\]" | sed 's/]//g')
+        k=$(cat {input.kmer})
         recycle.py -g {params.graph} -k $k -b {input.bam} \
             -o {params.outdir} > {log} 2>&1
         """

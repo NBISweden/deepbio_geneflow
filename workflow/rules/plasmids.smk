@@ -5,7 +5,7 @@ rule scapp:
         R2 = lambda wildcards: get_assembly_files(assemblies[wildcards.assembly], "R2"),
         log = opj("results", "logs", "assembly", "{assembly}.spades.log")
     output:
-        touch(opj("results", "scapp", "{assembly}", "scapp.done"))
+        touch(opj("results", "scapp", "{assembly}", "done"))
     log:
         opj("results", "logs", "plasmids", "{assembly}.scapp.log")
     conda:

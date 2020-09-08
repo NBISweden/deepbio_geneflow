@@ -12,7 +12,7 @@ ENV TMPDIR="/tmp"
 WORKDIR /analysis
 
 RUN apt-get update && \
-    apt-get install -y --no-install-recommends curl && apt-get clean
+    apt-get install -y --no-install-recommends curl libncurses5 && apt-get clean
 
 # Add environment file
 COPY environment.yaml .

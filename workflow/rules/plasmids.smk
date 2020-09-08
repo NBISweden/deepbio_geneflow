@@ -115,6 +115,31 @@ rule scapp:
         fi 
         """
 
+rule recycler:
+    input:
+        graph = opj("results", "assembly", "{assembly}", "assembly_graph.fastg.gz"),
+        bam = opj("results", "assembly", "{assembly}", "reads_pe_primary.sort.bam"),
+        bai = opj("results", "assembly", "{assembly}", "reads_pe_primary.sort.bam.bai"),
+        kmer = opj("results", "assembly", "{assembly}", "kmer")
+    output:
+        touch(opj("results", "recycler", "{assembly}", "{assembly}.cycs.fasta"))
+    log:
+        opj("results", "logs", "plasmids", "{assembly}.recycler.log")
+    params:
+        tmp = opj("$TMPDIR", "{assembly}.recycler"),
+        outdir = lambda wildcards, output: os.path.dirname(output[0]),
+        graph = opj("$TMPDIR", "{assembly}.recycler", "{assembly}.fastg")
+    conda:
+        "../envs/recycler.yaml"
+    shell:
+        """
+        mkdir -p {params.tmp}
+        gunzip -c {input.graph} > {params.graph}
+        k=$(cat {input.kmer})
+        recycle.py -g {params.graph} -k $k -b {input.bam} \
+            -o {params.outdir} > {log} 2>&1
+        """
+
 rule mpspades:
     input:
         R1 = lambda wildcards: get_assembly_files(assemblies[wildcards.assembly], "R1"),
@@ -154,29 +179,4 @@ rule mpspades:
         mv {params.tmp}/spades.log {params.tmp}/params.txt {params.output_dir}
         # Clean up
         rm -r {params.tmp}
-        """
-
-rule recycler:
-    input:
-        bam = opj("results", "assembly", "{assembly}", "reads_pe_primary.sort.bam"),
-        bai = opj("results", "assembly", "{assembly}", "reads_pe_primary.sort.bam.bai"),
-        kmer = opj("results", "assembly", "{assembly}", "kmer"),
-        graph = opj("results", "assembly", "{assembly}", "assembly_graph.fastg.gz")
-    output:
-        touch(opj("results", "recycler", "{assembly}", "done"))
-    log:
-        opj("results", "logs", "plasmids", "{assembly}.recycler.log")
-    params:
-        tmp = opj("$TMPDIR", "{assembly}.recycler"),
-        outdir = lambda wildcards, output: os.path.dirname(output[0]),
-        graph = opj("$TMPDIR", "{assembly}.recycler", "{assembly}.fastg")
-    conda:
-        "../envs/recycler.yaml"
-    shell:
-        """
-        mkdir -p {params.tmp}
-        gunzip -c {input.graph} > {params.graph}
-        k=$(cat {input.kmer})
-        recycle.py -g {params.graph} -k $k -b {input.bam} \
-            -o {params.outdir} > {log} 2>&1
         """

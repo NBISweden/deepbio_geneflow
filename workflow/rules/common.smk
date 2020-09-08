@@ -28,3 +28,15 @@ samples, assemblies = parse_samples(df)
 wildcard_constraints:
     unit="\d+",
     pair="R[12]"
+
+localrules: compress_testdata
+
+rule compress_testdata:
+    input:
+        "data/testdata/test_R{i}.fastq"
+    output:
+        "data/testdata/test_R{i}.fastq.gz"
+    shell:
+        """
+        gzip -c {input} > {output}
+        """

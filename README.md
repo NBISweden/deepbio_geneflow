@@ -12,6 +12,15 @@ Analyzing gene flow in the deep biosphere via "multi-omics" integrated analysis.
 
 ## Data locations
 
+`data/testdata/` : 
+
+This folder contains a small test dataset comprised of the 
+[SCAPP](https://github.com/Shamir-Lab/SCAPP) test data + 100 k paired-end
+reads generated from a '[synthetic metagenome](https://zenodo.org/record/3737112)' 
+using `bwa`. To use it, make sure you compress the files under 
+`data/testdata/test_R*.fastq` with gzip, then run the workflow using the 
+default `config/samples.tsv` file as the `sample_list` parameter.
+
  ## Tools and outline
  ### Plasmids
 

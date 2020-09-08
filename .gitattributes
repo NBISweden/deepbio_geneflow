@@ -1,2 +1,2 @@
-data/testdata/test_R1.fastq filter=lfs diff=lfs merge=lfs -text
-data/testdata/test_R2.fastq filter=lfs diff=lfs merge=lfs -text
+*.fastq filter=lfs diff=lfs merge=lfs -text
+*.fastq filter=lfs diff=lfs merge=lfs -text

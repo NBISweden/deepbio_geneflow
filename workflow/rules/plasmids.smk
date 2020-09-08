@@ -81,7 +81,9 @@ rule scapp:
         bai = opj("results", "assembly", "{assembly}", "reads_pe_primary.sort.bam.bai"),
         kmer = opj("results", "assembly", "{assembly}", "kmer")
     output:
-        touch(opj("results", "scapp", "{assembly}", "{assembly}.confident_cycs.fasta"))
+        report(touch(opj("results", "scapp", "{assembly}", "{assembly}.confident_cycs.fasta")),
+               caption="../report/scapp.rst", category = "Plasmids",
+               subcategory="SCAPP")
     log:
         opj("results", "logs", "plasmids", "{assembly}.scapp.log")
     conda:
@@ -122,7 +124,9 @@ rule recycler:
         bai = opj("results", "assembly", "{assembly}", "reads_pe_primary.sort.bam.bai"),
         kmer = opj("results", "assembly", "{assembly}", "kmer")
     output:
-        touch(opj("results", "recycler", "{assembly}", "{assembly}.cycs.fasta"))
+        touch(report(opj("results", "recycler", "{assembly}", "{assembly}.cycs.fasta"),
+                     caption="../report/recycler.rst", category = "Plasmids",
+                     subcategory="Recycler"))
     log:
         opj("results", "logs", "plasmids", "{assembly}.recycler.log")
     params:
@@ -145,9 +149,11 @@ rule mpspades:
         R1 = lambda wildcards: get_assembly_files(assemblies[wildcards.assembly], "R1"),
         R2 = lambda wildcards: get_assembly_files(assemblies[wildcards.assembly], "R2")
     output:
-        expand(opj("results", "mpspades", "{{assembly}}", "{f}.fasta.gz"),
-               f = ["contigs", "scaffolds"]),
-        touch(opj("results", "mpspades", "{assembly}", "assembly_graph.fastg.gz"))
+        contigs = report(opj("results", "mpspades", "{assembly}", "contigs.fasta.gz"),
+                         caption="../report/mpspades.rst", category="Plasmids",
+                         subcategory="metaplasmidSPAdes"),
+        scaffolds = opj("results", "mpspades", "{assembly}", "scaffolds.fasta.gz"),
+        graph = touch(opj("results", "mpspades", "{assembly}", "assembly_graph.fastg.gz"))
     log:
         opj("results", "logs", "plasmids", "{assembly}.mpspades.log")
     threads: 4
@@ -174,6 +180,9 @@ rule mpspades:
         # Move output
         # Compress output
         gzip {params.tmp}/scaffolds.fasta {params.tmp}/contigs.fasta
+        if [ -f {params.tmp}/assembly_graph.fastg ]; then
+            gzip {params.tmp}/assembly_graph.fastg
+        fi
         # Move output from temporary directory
         mv {params.tmp}/*.gz {params.output_dir}
         mv {params.tmp}/spades.log {params.tmp}/params.txt {params.output_dir}

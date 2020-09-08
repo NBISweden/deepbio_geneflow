@@ -14,12 +14,15 @@ Analyzing gene flow in the deep biosphere via "multi-omics" integrated analysis.
 
 `data/testdata/` : 
 
-This folder contains a small test dataset comprised of the 
-[SCAPP](https://github.com/Shamir-Lab/SCAPP) test data + 100 k paired-end
-reads generated from a '[synthetic metagenome](https://zenodo.org/record/3737112)' 
-using `bwa`. To use it, make sure you compress the files under 
-`data/testdata/test_R*.fastq` with gzip, then run the workflow using the 
-default `config/samples.tsv` file as the `sample_list` parameter.
+This folder contains a small test dataset comprised of 25k paired-end reads 
+from the [SCAPP](https://github.com/Shamir-Lab/SCAPP) test data + 25k paired-end 
+reads each from three plasmids:
+- CEX4 plasmid pCEX4 (LC556220.1, *Enterobacter cloacae*)
+- unnamed plasmid (NC_012780.1, *[Eubacterium] eligens ATCC 27750*)
+- plasmid pBPSE01 (NZ_KF418775.1, *Burkholderia pseudomallei strain MSHR1950*)
+
+generated using `randomreads.sh` from `bbmap`. The total size of the test 
+dataset is thus 100k paired-end reads.
 
  ## Tools and outline
  ### Plasmids

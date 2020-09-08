@@ -2,8 +2,8 @@
 # After configuring, running snakemake -n in a clone of this repository should
 # successfully execute a dry-run of the workflow.
 include: "rules/common.smk"
-include: "rules/testdata.smk"
 include: "rules/assembly.smk"
+include: "rules/plasmids.smk"
 
 report: "report/workflow.rst"
 
@@ -13,5 +13,10 @@ singularity: "docker://continuumio/miniconda3:4.8.2"
 
 rule all:
     input:
-        expand(opj("results", "assembly", "{assembly}", "scaffolds.fasta"),
+        scapp = expand(opj("results", "scapp", "{assembly}", "{assembly}.confident_cycs.fasta"),
+               assembly = assemblies.keys()),
+        recycler = expand(opj("results", "recycler", "{assembly}", "{assembly}.cycs.fasta"),
+               assembly = assemblies.keys()),
+        mpspades = expand(opj("results", "mpspades", "{assembly}", "{f}.gz"),
+               f = ["contigs.fasta", "scaffolds.fasta", "assembly_graph.fastg"],
                assembly = assemblies.keys())

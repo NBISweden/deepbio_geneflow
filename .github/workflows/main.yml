@@ -26,8 +26,19 @@ jobs:
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
     - uses: actions/checkout@v2
+      with:
+        lfs: true
     - uses: s-weigand/setup-conda@v1
     - name: Install the conda environment
       run: conda env update -n base -f environment.yaml
-    - name: Dry-run
-      run: snakemake --use-conda -j 8 -n
+    - name: Run workflow
+      run: snakemake --use-conda -j 8 -p
+      env:
+        TMPDIR: /tmp
+    - name: Generate report
+      run: snakemake --use-conda --report report.html
+    - name: Upload snakemake report
+      uses: actions/upload-artifact@v1
+      with:
+        name: test-report.html
+        path: report.html

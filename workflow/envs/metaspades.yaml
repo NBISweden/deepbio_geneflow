@@ -1,5 +1,6 @@
 name: metaspades
 channels:
   - bioconda
+  - conda-forge
 dependencies:
   - spades=3.14.1

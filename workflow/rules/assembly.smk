@@ -5,14 +5,16 @@ rule metaspades:
         R1 = lambda wildcards: get_assembly_files(assemblies[wildcards.assembly], "R1"),
         R2 = lambda wildcards: get_assembly_files(assemblies[wildcards.assembly], "R2")
     output:
-        expand(opj("results", "assembly", "{{assembly}}", "{f}.fasta"),
+        fasta = expand(opj("results", "assembly", "{{assembly}}", "{f}.fasta.gz"),
                f = ["contigs", "scaffolds"]),
-        opj("results", "assembly", "{assembly}", "assembly_graph.fastg")
+        fastg = opj("results", "assembly", "{assembly}", "assembly_graph.fastg.gz"),
+        kmer = opj("results", "assembly", "{assembly}", "kmer")
     log:
         opj("results", "logs", "assembly", "{assembly}.spades.log")
     params:
         tmp=opj("$TMPDIR","{assembly}.metaspades"),
-        output_dir=lambda wildcards, output: os.path.dirname(output[0])
+        output_dir=lambda wildcards, output: os.path.dirname(output[0]),
+        account=config["project"]
     threads: 20
     resources:
         runtime=lambda wildcards, attempt: attempt**2*60*8
@@ -32,8 +34,15 @@ rule metaspades:
             -t {threads} -1 {params.tmp}/R1.fq -2 {params.tmp}/R2.fq \
             -o {params.tmp} > {log} 2>&1
         
-        # Clean up input files
-        rm {params.tmp}/R1.fq {params.tmp}/R2.fq
+        # Compress output
+        gzip {params.tmp}/scaffolds.fasta {params.tmp}/contigs.fasta {params.tmp}/assembly_graph.fastg
         # Move output from temporary directory
-        mv {params.tmp}/* {params.output_dir}       
+        mv {params.tmp}/*.gz {params.output_dir}
+        mv {params.tmp}/spades.log {params.tmp}/params.txt {params.output_dir}
+        # Clean up
+        rm -r {params.tmp}
+        
+        # Extract max kmer from spades log
+        k=$(egrep -A 1 "^Assembly parameters:" {log} | grep "k:" | egrep -o "[0-9]+\]" | sed 's/]//g')
+        echo "$k" > {output.kmer}
         """

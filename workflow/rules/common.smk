@@ -1,4 +1,3 @@
-localrules: link_samples
 from snakemake.utils import validate
 import pandas as pd
 import platform
@@ -28,17 +27,16 @@ samples, assemblies = parse_samples(df)
 
 wildcard_constraints:
     unit="\d+",
-    pair="R[12]",
+    pair="R[12]"
 
-rule link_samples:
+localrules: compress_testdata
+
+rule compress_testdata:
     input:
-        lambda wildcards: samples[wildcards.sample][wildcards.unit][wildcards.R]
+        "data/testdata/test_R{i}.fastq"
     output:
-        temp(opj("results", "stage", "{sample}_{unit}_{R}.fastq.gz"))
-    params:
-        abs_in = lambda wildcards, input: os.path.abspath(input[0]),
-        abs_out = lambda wildcards, output: os.path.abspath(output[0]),
+        "data/testdata/test_R{i}.fastq.gz"
     shell:
         """
-        ln -s {params.abs_in} {params.abs_out}
+        gzip -c {input} > {output}
         """

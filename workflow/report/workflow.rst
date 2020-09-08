@@ -1,0 +1,1 @@
+A snakemake workflow for detecting mobile genetic elements

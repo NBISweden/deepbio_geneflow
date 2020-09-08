@@ -1,2 +1,2 @@
-# configfile with parameters for the project
-example_dataset_size: 10000
+# sample list
+sample_list: config/samples.tsv

@@ -12,6 +12,18 @@ Analyzing gene flow in the deep biosphere via "multi-omics" integrated analysis.
 
 ## Data locations
 
+`data/testdata/` : 
+
+This folder contains a small test dataset comprised of 25k paired-end reads 
+from the [SCAPP](https://github.com/Shamir-Lab/SCAPP) test data + 25k paired-end 
+reads each from three plasmids:
+- CEX4 plasmid pCEX4 (LC556220.1, *Enterobacter cloacae*)
+- unnamed plasmid (NC_012780.1, *[Eubacterium] eligens ATCC 27750*)
+- plasmid pBPSE01 (NZ_KF418775.1, *Burkholderia pseudomallei strain MSHR1950*)
+
+generated using `randomreads.sh` from `bbmap`. The total size of the test 
+dataset is thus 100k paired-end reads.
+
  ## Tools and outline
  ### Plasmids
 

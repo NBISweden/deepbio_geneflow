@@ -32,7 +32,7 @@ rule metaspades:
         # Run metaspades
         spades.py --meta \
             -t {threads} -1 {params.tmp}/R1.fq -2 {params.tmp}/R2.fq \
-            -o {params.tmp}
+            -o {params.tmp} > {log} 2>&1
         
         # Compress output
         gzip {params.tmp}/scaffolds.fasta {params.tmp}/contigs.fasta {params.tmp}/assembly_graph.fastg

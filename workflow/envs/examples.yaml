@@ -1,5 +1,0 @@
-channels:
-  - bioconda
-  - defaults
-dependencies:
-  - seqtk=1.3

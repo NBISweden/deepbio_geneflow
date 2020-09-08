@@ -81,7 +81,7 @@ rule scapp:
         bai = opj("results", "assembly", "{assembly}", "reads_pe_primary.sort.bam.bai"),
         kmer = opj("results", "assembly", "{assembly}", "kmer")
     output:
-        touch(opj("results", "scapp", "{assembly}", "assembly_graph.confident_cycs.fasta"))
+        touch(opj("results", "scapp", "{assembly}", "{assembly}.confident_cycs.fasta"))
     log:
         opj("results", "logs", "plasmids", "{assembly}.scapp.log")
     conda:
@@ -100,13 +100,13 @@ rule scapp:
         mkdir -p {params.tmpdir}
         
         # Unzip fastg
-        gunzip -c {input.fastg} > {params.tmpdir}/assembly_graph.fastg
+        gunzip -c {input.fastg} > {params.tmpdir}/{wildcards.assembly}.fastg
         
         # Get kmer size
         k=$(cat {input.kmer})
         
         # Run SCAPP
-        scapp -p {threads} -g {params.tmpdir}/assembly_graph.fastg -k $k \
+        scapp -p {threads} -g {params.tmpdir}/{wildcards.assembly}.fastg -k $k \
             -b {input.bam} -o {params.outdir} > {log} 2>&1
         exitcode=$?
         if [ $exitcode -eq 1 ]

@@ -3,7 +3,7 @@ rule minced:
         opj("results", "assembly", "{assembly}", "contigs.fasta.gz")
     output:
         txt = report(opj("results", "minced", "{assembly}", "{assembly}.crisprs.txt.gz"),
-                     caption="..report/minced.rst", category="CRISPRs", subcategory="Minced"),
+                     caption="../report/minced.rst", category="CRISPRs", subcategory="Minced"),
         gff = opj("results", "minced", "{assembly}", "{assembly}.crisprs.gff.gz")
     params:
         tmp = opj("$TMPDIR", "{assembly}.minced"),

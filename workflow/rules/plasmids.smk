@@ -57,8 +57,7 @@ rule bwa_mem:
         tmp = opj("$TMPDIR", "{assembly}.bwa"),
         R1 = opj("$TMPDIR", "{assembly}.bwa", "R1.fastq"),
         R2 = opj("$TMPDIR", "{assembly}.bwa", "R2.fastq"),
-        outdir = lambda wildcards, output: os.path.dirname(output[0]),
-        account=config["project"]        
+        outdir = lambda wildcards, output: os.path.dirname(output[0])       
     threads: 4
     resources:
         runtime = lambda wildcards, attempt: attempt**2*60*4

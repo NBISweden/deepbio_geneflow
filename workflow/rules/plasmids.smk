@@ -27,6 +27,8 @@ rule bwa_index:
                s = ["amb", "ann", "bwt", "pac", "sa"])
     log:
         opj("results", "logs", "plasmids", "{assembly}.bwa_index.log")
+    resources:
+        runtime = lambda wildcards, attempt: attempt**2*60*2
     conda:
         "../envs/bwa.yaml"
     shell:
@@ -129,6 +131,8 @@ rule recycler:
                      subcategory="Recycler"))
     log:
         opj("results", "logs", "plasmids", "{assembly}.recycler.log")
+    resources:
+        runtime = lambda wildcards, attempt: attempt**2*60*4
     params:
         tmp = opj("$TMPDIR", "{assembly}.recycler"),
         outdir = lambda wildcards, output: os.path.dirname(output[0]),
@@ -157,6 +161,8 @@ rule mpspades:
     log:
         opj("results", "logs", "plasmids", "{assembly}.mpspades.log")
     threads: 4
+    resources:
+        runtime = lambda wildcards, attempt: attempt**2*60*6
     params:
         tmp=opj("$TMPDIR","{assembly}.mpspades"),
         output_dir=lambda wildcards, output: os.path.dirname(output[0]),

@@ -31,14 +31,36 @@ jobs:
     - uses: s-weigand/setup-conda@v1
     - name: Install the conda environment
       run: conda env update -n base -f environment.yaml
-    - name: Run workflow
-      run: snakemake --use-conda -j 8 -p
+    - name: Assemble
+      run: snakemake --use-conda -j 8 -p assemble
       env:
         TMPDIR: /tmp
-    - name: Generate report
-      run: snakemake --use-conda --report report.html
-    - name: Upload snakemake report
+    - name: Plasmids
+      run: |
+        snakemake --use-conda -j 8 -p results/scapp/test/test.confident_cycs.fasta
+        snakemake --use-conda -j 8 -p results/recycler/test/test.cycs.fasta
+        snakemake --use-conda -j 8 -p results/mpspades/test/contigs.fasta.gz
+      env:
+        TMPDIR: /tmp
+    - name: Generate plasmids report
+      run: snakemake --use-conda --report plasmids-report.html $REC $SCA $MPS
+      env:
+        REC: results/recycler/test/test.confident_cycs.fasta
+        SCA: results/recycler/test/test.cycs.fasta
+        MPS: results/mpspades/test/contigs.fasta.gz
+    - name: Upload plasmids report
       uses: actions/upload-artifact@v1
       with:
-        name: test-report.html
-        path: report.html
+        name: plasmids-report.html
+        path: plasmids-report.html
+    - name: CRISPRs
+      run: snakemake --use-conda -j 8 -p results/minced/mock/mock.crisprs.txt.gz
+      env:
+        TMPDIR: /tmp
+    - name: Generate CRISPR report
+      run: snakemake --use-conda --report crisprs-report.html results/minced/mock/mock.crisprs.txt.gz
+    - name: Upload CRISPRs report
+      uses: actions/upload-artifact@v1
+      with:
+        name: crisprs-report.html
+        path: crisprs-report.html

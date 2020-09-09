@@ -166,9 +166,9 @@ rule mpspades:
         graph = touch(opj("results", "mpspades", "{assembly}", "assembly_graph.fastg.gz"))
     log:
         opj("results", "logs", "plasmids", "{assembly}.mpspades.log")
-    threads: 4
+    threads: 20
     resources:
-        runtime = lambda wildcards, attempt: attempt**2*60*6
+        runtime = lambda wildcards, attempt: attempt**2*60*10
     params:
         tmp=opj("$TMPDIR","{assembly}.mpspades"),
         output_dir=lambda wildcards, output: os.path.dirname(output[0]),

@@ -10,7 +10,8 @@ rule minced:
         fa = opj("$TMPDIR", "{assembly}.minced", "contigs.fasta"),
         txt = opj("$TMPDIR", "{assembly}.minced", "{assembly}.crisprs.txt"),
         gff = opj("$TMPDIR", "{assembly}.minced", "{assembly}.crisprs.gff"),
-        outdir = lambda wildcards, output: os.path.dirname(output.txt)
+        outdir = lambda wildcards, output: os.path.dirname(output.txt),
+        account=config["project"]
     conda:
         "../envs/minced.yaml"
     resources:

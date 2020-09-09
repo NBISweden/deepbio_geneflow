@@ -5,7 +5,8 @@ rule make_fasta_from_fastg:
         opj("results", "assembly", "{assembly}", "assembly_graph.nodes.fasta")
     params:
         tmp = opj("$TMPDIR", "{assembly}.fastg2fasta"),
-        fastg = opj("$TMPDIR", "{assembly}.fastg2fasta", "assembly_graph.fastg")
+        fastg = opj("$TMPDIR", "{assembly}.fastg2fasta", "assembly_graph.fastg"),
+        account=config["project"]
     resources:
         runtime = lambda wildcards, attempt: attempt**2*60
     conda:
@@ -27,6 +28,8 @@ rule bwa_index:
                s = ["amb", "ann", "bwt", "pac", "sa"])
     log:
         opj("results", "logs", "plasmids", "{assembly}.bwa_index.log")
+    params:
+        account=config["project"]
     resources:
         runtime = lambda wildcards, attempt: attempt**2*60*2
     conda:
@@ -50,10 +53,12 @@ rule bwa_mem:
     log:
         opj("results", "logs", "plasmids", "{assembly}.bwa.log")
     params:
+        account=config["project"],
         tmp = opj("$TMPDIR", "{assembly}.bwa"),
         R1 = opj("$TMPDIR", "{assembly}.bwa", "R1.fastq"),
         R2 = opj("$TMPDIR", "{assembly}.bwa", "R2.fastq"),
-        outdir = lambda wildcards, output: os.path.dirname(output[0])
+        outdir = lambda wildcards, output: os.path.dirname(output[0]),
+        account=config["project"]        
     threads: 4
     resources:
         runtime = lambda wildcards, attempt: attempt**2*60*4
@@ -134,6 +139,7 @@ rule recycler:
     resources:
         runtime = lambda wildcards, attempt: attempt**2*60*4
     params:
+        account=config["project"],
         tmp = opj("$TMPDIR", "{assembly}.recycler"),
         outdir = lambda wildcards, output: os.path.dirname(output[0]),
         graph = opj("$TMPDIR", "{assembly}.recycler", "{assembly}.fastg")

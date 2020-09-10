@@ -1,3 +1,5 @@
+![CI](https://github.com/NBISweden/deepbio_geneflow/workflows/CI/badge.svg)
+
 # Deep Biosphere Geneflow project
 Analyzing gene flow in the deep biosphere via "multi-omics" integrated analysis.
 

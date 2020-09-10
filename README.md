@@ -16,16 +16,24 @@ Analyzing gene flow in the deep biosphere via "multi-omics" integrated analysis.
 
 `data/testdata/` : 
 
-This folder contains a small test dataset comprised of 25k paired-end reads 
+This folder contains two small test datasets:
+
+- **test**
+
+This dataset is comprised of 25k paired-end reads 
 from the [SCAPP](https://github.com/Shamir-Lab/SCAPP) test data + 25k paired-end 
 reads each from three plasmids:
 - CEX4 plasmid pCEX4 (LC556220.1, *Enterobacter cloacae*)
 - unnamed plasmid (NC_012780.1, *[Eubacterium] eligens ATCC 27750*)
 - plasmid pBPSE01 (NZ_KF418775.1, *Burkholderia pseudomallei strain MSHR1950*)
+generated using `randomreads.sh` from `bbmap`.
 
-generated using `randomreads.sh` from `bbmap`. The total size of the test 
-dataset is thus 100k paired-end reads.
+- **mock**
 
+comprised of 50k reads from the `minced` testdata of the *Aquifex aeolicus* VF5 
+genome (generated with `randomreads.sh`) + 50k reads subsampled from a 
+[synthetic mock]() metagenome (using `seqtk`).
+ 
  ## Tools and outline
  ### Plasmids
 

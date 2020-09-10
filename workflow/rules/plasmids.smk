@@ -5,7 +5,8 @@ rule make_fasta_from_fastg:
         opj("results", "assembly", "{assembly}", "assembly_graph.nodes.fasta")
     params:
         tmp = opj("$TMPDIR", "{assembly}.fastg2fasta"),
-        fastg = opj("$TMPDIR", "{assembly}.fastg2fasta", "assembly_graph.fastg")
+        fastg = opj("$TMPDIR", "{assembly}.fastg2fasta", "assembly_graph.fastg"),
+        account=config["project"]
     resources:
         runtime = lambda wildcards, attempt: attempt**2*60
     conda:
@@ -27,6 +28,10 @@ rule bwa_index:
                s = ["amb", "ann", "bwt", "pac", "sa"])
     log:
         opj("results", "logs", "plasmids", "{assembly}.bwa_index.log")
+    params:
+        account=config["project"]
+    resources:
+        runtime = lambda wildcards, attempt: attempt**2*60*2
     conda:
         "../envs/bwa.yaml"
     shell:
@@ -48,10 +53,11 @@ rule bwa_mem:
     log:
         opj("results", "logs", "plasmids", "{assembly}.bwa.log")
     params:
+        account=config["project"],
         tmp = opj("$TMPDIR", "{assembly}.bwa"),
         R1 = opj("$TMPDIR", "{assembly}.bwa", "R1.fastq"),
         R2 = opj("$TMPDIR", "{assembly}.bwa", "R2.fastq"),
-        outdir = lambda wildcards, output: os.path.dirname(output[0])
+        outdir = lambda wildcards, output: os.path.dirname(output[0])       
     threads: 4
     resources:
         runtime = lambda wildcards, attempt: attempt**2*60*4
@@ -129,7 +135,10 @@ rule recycler:
                      subcategory="Recycler"))
     log:
         opj("results", "logs", "plasmids", "{assembly}.recycler.log")
+    resources:
+        runtime = lambda wildcards, attempt: attempt**2*60*4
     params:
+        account=config["project"],
         tmp = opj("$TMPDIR", "{assembly}.recycler"),
         outdir = lambda wildcards, output: os.path.dirname(output[0]),
         graph = opj("$TMPDIR", "{assembly}.recycler", "{assembly}.fastg")
@@ -156,7 +165,9 @@ rule mpspades:
         graph = touch(opj("results", "mpspades", "{assembly}", "assembly_graph.fastg.gz"))
     log:
         opj("results", "logs", "plasmids", "{assembly}.mpspades.log")
-    threads: 4
+    threads: 20
+    resources:
+        runtime = lambda wildcards, attempt: attempt**2*60*10
     params:
         tmp=opj("$TMPDIR","{assembly}.mpspades"),
         output_dir=lambda wildcards, output: os.path.dirname(output[0]),

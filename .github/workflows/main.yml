@@ -45,8 +45,8 @@ jobs:
     - name: Generate plasmids report
       run: snakemake --use-conda --report plasmids-report.html $REC $SCA $MPS
       env:
-        REC: results/recycler/test/test.confident_cycs.fasta
-        SCA: results/recycler/test/test.cycs.fasta
+        SCA: results/scapp/test/test.confident_cycs.fasta
+        REC: results/recycler/test/test.cycs.fasta
         MPS: results/mpspades/test/contigs.fasta.gz
     - name: Upload plasmids report
       uses: actions/upload-artifact@v1

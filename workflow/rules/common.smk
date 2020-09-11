@@ -33,9 +33,9 @@ localrules: compress_testdata
 
 rule compress_testdata:
     input:
-        "data/testdata/test_R{i}.fastq"
+        "data/testdata/{f}_R{i}.fastq"
     output:
-        "data/testdata/test_R{i}.fastq.gz"
+        "data/testdata/{f}_R{i}.fastq.gz"
     shell:
         """
         gzip -c {input} > {output}

@@ -4,6 +4,7 @@
 include: "rules/common.smk"
 include: "rules/assembly.smk"
 include: "rules/plasmids.smk"
+include: "rules/crispr.smk"
 
 report: "report/workflow.rst"
 
@@ -19,4 +20,26 @@ rule all:
                assembly = assemblies.keys()),
         mpspades = expand(opj("results", "mpspades", "{assembly}", "{f}.gz"),
                f = ["contigs.fasta", "scaffolds.fasta", "assembly_graph.fastg"],
+               assembly = assemblies.keys()),
+        minced = expand(opj("results", "minced", "{assembly}", "{assembly}.crisprs.{s}.gz"),
+                         assembly = assemblies.keys(), s = ["txt", "gff"])
+
+rule assemble:
+    input:
+        expand(opj("results", "assembly", "{assembly}", "{f}.gz"),
+               assembly = assemblies.keys(), f = ["contigs.fasta", "scaffolds.fasta"])
+
+rule plasmids:
+    input:
+        scapp = expand(opj("results", "scapp", "{assembly}", "{assembly}.confident_cycs.fasta"),
+               assembly = assemblies.keys()),
+        recycler = expand(opj("results", "recycler", "{assembly}", "{assembly}.cycs.fasta"),
+               assembly = assemblies.keys()),
+        mpspades = expand(opj("results", "mpspades", "{assembly}", "{f}.gz"),
+               f = ["contigs.fasta", "scaffolds.fasta", "assembly_graph.fastg"],
                assembly = assemblies.keys())
+
+rule crisprs:
+    input:
+        minced = expand(opj("results", "minced", "{assembly}", "{assembly}.crisprs.{s}.gz"),
+                         assembly = assemblies.keys(), s = ["txt", "gff"])

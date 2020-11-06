@@ -43,7 +43,37 @@ genome (generated with `randomreads.sh`) + 50k reads subsampled from a
 
 ### Phages
 - [Virsorter](https://github.com/simroux/VirSorter) ([Roux et al 2015](https://peerj.com/articles/985/))
-- [MetaviralSPADES](https://github.com/ablab/spades/tree/metaviral_publication) ([Antipov et al 2020](https://academic.oup.com/bioinformatics/article-abstract/36/14/4126/5837667)) 
+
+  Virsorter uses curated protein databases of viral genes which are queried with
+  `hmmsearch` or `blastp` using genes predicted on contigs as queries. Metrics
+  are then computed using sliding windows to look for enrichment of 'viral' 
+  signals, followed by calculation of a significance score. It also includes a 
+  step to identify circular sequences as an initial step. The author notes that:
+  > for fragmented genomes, *category 3* predictions help recover more viral 
+  >sequences, but do so at the cost of increased false-positives.
+
+- [MetaviralSPADES](https://github.com/ablab/spades/tree/metaviral_publication) ([Antipov et al 2020](https://academic.oup.com/bioinformatics/article-abstract/36/14/4126/5837667))
+  
+  MetaviralSPADES is essentially a modified version of the MetaSPADES assembler
+  that looks for viral contigs in the MetaSPADES assembly graph using 
+  differences in coverage. Further steps include *viralVerify* and 
+  *viralComplete* to verify contigs and check viral genome completeness 
+  respectively.
+  
+- [MARVEL](https://github.com/LaboratorioBioinformatica/MARVEL) ([Amgarten et al 2018](https://www.frontiersin.org/articles/10.3389/fgene.2018.00304/full)) 
+  
+  Marvel uses a random forest classifier to classify metagenomic bins as 
+  phage/bacteria based on features such as 1) gene density, 2) strand shifts
+  and 3) fraction of hits to [pVOG database](http://dmk-brain.ecn.uiowa.edu/pVOGs/).
+  The classifier was trained on 1,247 phage and 1,029 bacterial genomes. The 
+  authors note that:
+  >MARVEL has high F1 scores and accuracy for all bin lengths analyzed, but 
+  >especially for bins composed of contigs 4 kbp long and longer.
+ 
+- [VIBRANT](https://github.com/AnantharamanLab/VIBRANT/) ([Kieft et al 2020](https://microbiomejournal.biomedcentral.com/articles/10.1186/s40168-020-00867-0))
+
+  VIBRANT uses machine learning (neural networks) based on annotation
+  metrics derived from HMM searches against KEGG, PFAM AND [VOG](http://vogdb.org/).  
 
 ### CRISPR
 - [Minced](https://github.com/ctSkennerton/minced)

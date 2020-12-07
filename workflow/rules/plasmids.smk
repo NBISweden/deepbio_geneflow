@@ -1,83 +1,59 @@
-rule make_fasta_from_fastg:
+rule bowtie_index:
     input:
-        opj("results", "assembly", "{assembly}", "assembly_graph.fastg.gz")
+        "results/assembly/{assembly}/assembly_graph.nodes.fasta"
     output:
-        opj("results", "assembly", "{assembly}", "assembly_graph.nodes.fasta")
-    params:
-        tmp = opj("$TMPDIR", "{assembly}.fastg2fasta"),
-        fastg = opj("$TMPDIR", "{assembly}.fastg2fasta", "assembly_graph.fastg"),
-        account=config["project"]
-    resources:
-        runtime = lambda wildcards, attempt: attempt**2*60
-    conda:
-        "../envs/recycler.yaml"
-    shell:
-        """
-        mkdir -p {params.tmp}
-        gunzip -c {input[0]} > {params.fastg}
-        make_fasta_from_fastg.py -g {params.fastg} -o {output[0]}
-        rm -r {params.tmp}
-        """
-
-rule bwa_index:
-    input:
-        opj("results", "assembly", "{assembly}", "assembly_graph.nodes.fasta")
-    output:
-        expand(opj("results", "assembly", "{{assembly}}",
-                   "assembly_graph.nodes.fasta.{s}"),
-               s = ["amb", "ann", "bwt", "pac", "sa"])
+        expand("results/assembly/{{assembly}}/assembly_graph.nodes.{s}.bt2l",
+               s = ["1","2","3","4","rev.1","rev.2"])
     log:
-        opj("results", "logs", "plasmids", "{assembly}.bwa_index.log")
+        "results/logs/plasmids/{assembly}.bowtie_index.log"
     params:
-        account=config["project"]
+        account = config["project"],
+        prefix = "results/assembly/{assembly}/assembly_graph.nodes"
     resources:
         runtime = lambda wildcards, attempt: attempt**2*60*2
     conda:
-        "../envs/bwa.yaml"
+        "../envs/bowtie.yaml"
+    threads: 10
     shell:
         """
-        bwa index {input[0]} > {log} 2>&1
+        bowtie2-build -t {threads} --large-index {input} {params.prefix}
         """
 
-rule bwa_mem:
+rule bowtie2:
     input:
-        fasta = opj("results", "assembly", "{assembly}", "assembly_graph.nodes.fasta"),
+        fasta = "results/assembly/{assembly}/assembly_graph.nodes.fasta",
         R1 = lambda wildcards: get_assembly_files(assemblies[wildcards.assembly], "R1"),
         R2 = lambda wildcards: get_assembly_files(assemblies[wildcards.assembly], "R2"),
-        index = expand(opj("results", "assembly", "{{assembly}}",
-                   "assembly_graph.nodes.fasta.{s}"),
-               s = ["amb", "ann", "bwt", "pac", "sa"])
+        index = expand("results/assembly/{{assembly}}/assembly_graph.nodes.{s}.bt2l",
+               s = ["1","2","3","4","rev.1","rev.2"])
     output:
-        opj("results", "assembly", "{assembly}", "reads_pe_primary.sort.bam"),
-        opj("results", "assembly", "{assembly}", "reads_pe_primary.sort.bam.bai")
+        "results/assembly/{assembly}/reads_pe_primary.sort.bam",
+        "results/assembly/{assembly}/reads_pe_primary.sort.bam.bai"
     log:
-        opj("results", "logs", "plasmids", "{assembly}.bwa.log")
+        "results/logs/plasmids/{assembly}.bwa.log"
     params:
         account=config["project"],
-        tmp = opj("$TMPDIR", "{assembly}.bwa"),
-        R1 = opj("$TMPDIR", "{assembly}.bwa", "R1.fastq"),
-        R2 = opj("$TMPDIR", "{assembly}.bwa", "R2.fastq"),
-        outdir = lambda wildcards, output: os.path.dirname(output[0])       
+        tmp = "$TMPDIR/{assembly}.bowtie",
+        outdir = lambda wildcards, output: os.path.dirname(output[0]),
+        prefix = "results/assembly/{assembly}/assembly_graph.nodes"
     threads: 4
     resources:
         runtime = lambda wildcards, attempt: attempt**2*60*4
     conda:
-        "../envs/bwa.yaml"
+        "../envs/bowtie.yaml"
     shell:
         """
         mkdir -p {params.tmp}
-        
-        # Concatenate input
-        gunzip -c {input.R1} > {params.R1}
-        gunzip -c {input.R2} > {params.R2}
-        
+                
         # Map with bwa
-        bwa mem -t {threads} {input.fasta} {params.R1} {params.R2} 2>{log} | \
+        bowtie2 --very-sensitive -x {params.prefix} -p {threads} -1 {input.R1} -2 {input.R2} 2>{log} | \
             samtools view -buS - | samtools view -bF 0x0900 - | \
             samtools sort - > {params.tmp}/reads_pe_primary.sort.bam 
         # Index
         samtools index {params.tmp}/reads_pe_primary.sort.bam
         mv {params.tmp}/reads_pe_primary.sort.bam* {params.outdir}
+        # Clean up
+        rm -r {params.tmp}
         """
 
 rule scapp:

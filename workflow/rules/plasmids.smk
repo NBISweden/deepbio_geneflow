@@ -58,16 +58,15 @@ rule bowtie2:
 
 rule scapp:
     input:
-        fastg = opj("results", "assembly", "{assembly}", "assembly_graph.fastg.gz"),
-        bam = opj("results", "assembly", "{assembly}", "reads_pe_primary.sort.bam"),
-        bai = opj("results", "assembly", "{assembly}", "reads_pe_primary.sort.bam.bai"),
-        kmer = opj("results", "assembly", "{assembly}", "kmer")
+        fastg = "results/assembly/{assembly}/final.contigs.fastg",
+        bam = "results/assembly/{assembly}/reads_pe_primary.sort.bam",
+        bai = "results/assembly/{assembly}/reads_pe_primary.sort.bam.bai"
     output:
-        report(touch(opj("results", "scapp", "{assembly}", "{assembly}.confident_cycs.fasta")),
+        report(touch("results/scapp/{assembly}/{assembly}.confident_cycs.fasta"),
                caption="../report/scapp.rst", category = "Plasmids",
                subcategory="SCAPP")
     log:
-        opj("results", "logs", "plasmids", "{assembly}.scapp.log")
+        "results/logs/plasmids/{assembly}.scapp.log"
     conda:
         "../envs/scapp.yaml"
     threads: 4
@@ -75,7 +74,8 @@ rule scapp:
         runtime = lambda wildcards, attempt: attempt**2*60*4
     params:
         outdir = lambda wildcards, output: os.path.dirname(output[0]),
-        tmpdir = opj("$TMPDIR", "{assembly}.scapp"),
+        indir = lambda wildcards, input: os.path.dirname(input.fastg),
+        tmpdir = "$TMPDIR/{assembly}.scapp",
         account = config["project"]
     shell:
         """
@@ -83,15 +83,12 @@ rule scapp:
         # Create tmpdir
         mkdir -p {params.tmpdir}
         
-        # Unzip fastg
-        gunzip -c {input.fastg} > {params.tmpdir}/{wildcards.assembly}.fastg
-        
-        # Get kmer size
-        k=$(cat {input.kmer})
+        # Get k-max from log
+        files=$(ls {params.indir}/intermediate_contigs/*.final.contigs.fa)
+        k=$(basename $files | cut -f1 -d '.' | sed 's/k//g' | sort -n | tail -n 1)
         
         # Run SCAPP
-        scapp -p {threads} -g {params.tmpdir}/{wildcards.assembly}.fastg -k $k \
-            -b {input.bam} -o {params.outdir} > {log} 2>&1
+        scapp -p {threads} -g {input.fastg} -k $k -b {input.bam} -o {params.outdir} > {log} 2>&1
         exitcode=$?
         if [ $exitcode -eq 1 ]
         then

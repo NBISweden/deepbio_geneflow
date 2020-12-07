@@ -34,7 +34,8 @@ rule fasta2fastg:
     input:
         "results/assembly/{assembly}/final.contigs.fa"
     output:
-        "results/assembly/{assembly}/final.contigs.fastg"
+        "results/assembly/{assembly}/final.contigs.fastg",
+        "results/assembly/{assembly}/assembly_graph.nodes.fasta"
     params:
         indir = lambda wildcards, input: os.path.dirname(input[0])
     conda: "../envs/megahit.yaml"
@@ -43,5 +44,8 @@ rule fasta2fastg:
         # Get k-max from log
         files=$(ls {params.indir}/intermediate_contigs/*.final.contigs.fa)
         k=$(basename $files | cut -f1 -d '.' | sed 's/k//g' | sort -n | tail -n 1)
+        # Convert to fastg format
         megahit_toolkit contig2fastg $k {params.indir}/intermediate_contigs/$k.contigs.fa > {output[0]}
+        # Symlink corresponding fasta file
+        ln -s $(pwd)/{params.indir}/intermediate_contigs/k$k.contigs.fa {output[1]}
         """

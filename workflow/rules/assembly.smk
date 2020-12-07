@@ -20,6 +20,8 @@ rule megahit:
     conda:
         "../envs/megahit.yaml"
     threads: 20
+    resources:
+        runtime = lambda wildcards, attempt: attempt**2*60*10
     shell:
         """
         rm -rf {params.outdir}

@@ -1,8 +1,8 @@
-name: bwa
+name: bowtie
 channels:
-  - conda-forge
   - bioconda
+  - conda-forge
   - defaults
 dependencies:
-  - bwa=0.7.17
+  - bowtie2=2.4.2
   - samtools=1.10

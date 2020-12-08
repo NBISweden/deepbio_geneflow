@@ -16,7 +16,7 @@ rule bowtie_index:
     threads: 10
     shell:
         """
-        bowtie2-build -t {threads} --large-index {input} {params.prefix}
+        bowtie2-build -t {threads} --large-index {input} {params.prefix} 2>&log
         """
 
 rule bowtie2:
@@ -83,7 +83,7 @@ rule scapp:
         # Create tmpdir
         mkdir -p {params.tmpdir}
         
-        # Get k-max from log
+        # Get k-max
         files=$(ls {params.indir}/intermediate_contigs/*.final.contigs.fa)
         k=$(basename $files | cut -f1 -d '.' | sed 's/k//g' | sort -n | tail -n 1)
         
@@ -98,30 +98,32 @@ rule scapp:
 
 rule recycler:
     input:
-        graph = opj("results", "assembly", "{assembly}", "assembly_graph.fastg.gz"),
-        bam = opj("results", "assembly", "{assembly}", "reads_pe_primary.sort.bam"),
-        bai = opj("results", "assembly", "{assembly}", "reads_pe_primary.sort.bam.bai"),
-        kmer = opj("results", "assembly", "{assembly}", "kmer")
+        graph = "results/assembly/{assembly}/assembly_graph.fastg",
+        bam = "results/assembly/{assembly}/reads_pe_primary.sort.bam",
+        bai = "results/assembly/{assembly}/reads_pe_primary.sort.bam.bai"
     output:
-        touch(report(opj("results", "recycler", "{assembly}", "{assembly}.cycs.fasta"),
+        touch(report("results/recycler/{assembly}/{assembly}.cycs.fasta",
                      caption="../report/recycler.rst", category = "Plasmids",
                      subcategory="Recycler"))
     log:
-        opj("results", "logs", "plasmids", "{assembly}.recycler.log")
+        "results/logs/plasmids/{assembly}.recycler.log"
     resources:
         runtime = lambda wildcards, attempt: attempt**2*60*4
     params:
         account=config["project"],
-        tmp = opj("$TMPDIR", "{assembly}.recycler"),
+        tmp = "$TMPDIR/{assembly}.recycler",
         outdir = lambda wildcards, output: os.path.dirname(output[0]),
-        graph = opj("$TMPDIR", "{assembly}.recycler", "{assembly}.fastg")
+        graph = "$TMPDIR/{assembly}.recycler/{assembly}.fastg"
     conda:
         "../envs/recycler.yaml"
     shell:
         """
         mkdir -p {params.tmp}
-        gunzip -c {input.graph} > {params.graph}
-        k=$(cat {input.kmer})
-        recycle.py -g {params.graph} -k $k -b {input.bam} \
+        
+        # Get k-max
+        files=$(ls {params.indir}/intermediate_contigs/*.final.contigs.fa)
+        k=$(basename $files | cut -f1 -d '.' | sed 's/k//g' | sort -n | tail -n 1)
+        
+        recycle.py -g {input.graph} -k $k -b {input.bam} \
             -o {params.outdir} > {log} 2>&1
         """

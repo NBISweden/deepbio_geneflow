@@ -10,36 +10,32 @@ report: "report/workflow.rst"
 
 # this container defines the underlying OS for each job when using the workflow
 # with --use-conda --use-singularity
-singularity: "docker://continuumio/miniconda3:4.8.2"
+container: "docker://continuumio/miniconda3:4.8.2"
+
+scapp_output = expand("results/scapp/{assembly}/{assembly}.confident_cycs.fasta",
+               assembly = assemblies.keys())
+recycler_output = expand("results/recycler/{assembly}/{assembly}.cycs.fasta",
+               assembly = assemblies.keys())
+minced_output = expand("results/minced/{assembly}/{assembly}.crisprs.{s}.gz",
+                         assembly = assemblies.keys(), s = ["txt", "gff"])
+megahit_output = expand("results/assembly/{assembly}/final.contigs.fastg",
+               assembly = assemblies.keys())
 
 rule all:
     input:
-        scapp = expand(opj("results", "scapp", "{assembly}", "{assembly}.confident_cycs.fasta"),
-               assembly = assemblies.keys()),
-        recycler = expand(opj("results", "recycler", "{assembly}", "{assembly}.cycs.fasta"),
-               assembly = assemblies.keys()),
-        mpspades = expand(opj("results", "mpspades", "{assembly}", "{f}.gz"),
-               f = ["contigs.fasta", "scaffolds.fasta", "assembly_graph.fastg"],
-               assembly = assemblies.keys()),
-        minced = expand(opj("results", "minced", "{assembly}", "{assembly}.crisprs.{s}.gz"),
-                         assembly = assemblies.keys(), s = ["txt", "gff"])
+        scapp = scapp_output,
+        recycler = recycler_output,
+        minced = minced_output
 
 rule assemble:
     input:
-        expand(opj("results", "assembly", "{assembly}", "{f}.gz"),
-               assembly = assemblies.keys(), f = ["contigs.fasta", "scaffolds.fasta"])
+        megahit = megahit_output
 
 rule plasmids:
     input:
-        scapp = expand(opj("results", "scapp", "{assembly}", "{assembly}.confident_cycs.fasta"),
-               assembly = assemblies.keys()),
-        recycler = expand(opj("results", "recycler", "{assembly}", "{assembly}.cycs.fasta"),
-               assembly = assemblies.keys()),
-        mpspades = expand(opj("results", "mpspades", "{assembly}", "{f}.gz"),
-               f = ["contigs.fasta", "scaffolds.fasta", "assembly_graph.fastg"],
-               assembly = assemblies.keys())
+        scapp = scapp_output,
+        recycler = recycler_output,
 
 rule crisprs:
     input:
-        minced = expand(opj("results", "minced", "{assembly}", "{assembly}.crisprs.{s}.gz"),
-                         assembly = assemblies.keys(), s = ["txt", "gff"])
+        minced = minced_output

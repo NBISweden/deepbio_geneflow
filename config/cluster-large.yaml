@@ -8,3 +8,5 @@ __default__:
 
 metaspades:
   constraint: "mem1TB"
+mpspades:
+  constraint: "mem1TB"

@@ -1,15 +1,15 @@
 rule minced:
     input:
-        opj("results", "assembly", "{assembly}", "contigs.fasta.gz")
+        "results/assembly/{assembly}/final.contigs.fa"
     output:
-        txt = report(opj("results", "minced", "{assembly}", "{assembly}.crisprs.txt.gz"),
+        txt = report("results/minced/{assembly}/{assembly}.crisprs.txt.gz",
                      caption="../report/minced.rst", category="CRISPRs", subcategory="Minced"),
-        gff = opj("results", "minced", "{assembly}", "{assembly}.crisprs.gff.gz")
+        gff = "results/minced/{assembly}/{assembly}.crisprs.gff.gz"
     params:
-        tmp = opj("$TMPDIR", "{assembly}.minced"),
-        fa = opj("$TMPDIR", "{assembly}.minced", "contigs.fasta"),
-        txt = opj("$TMPDIR", "{assembly}.minced", "{assembly}.crisprs.txt"),
-        gff = opj("$TMPDIR", "{assembly}.minced", "{assembly}.crisprs.gff"),
+        tmp = "$TMPDIR/{assembly}.minced",
+        fa = "$TMPDIR/{assembly}.minced/contigs.fasta",
+        txt = "$TMPDIR/{assembly}.minced/{assembly}.crisprs.txt",
+        gff = "$TMPDIR/{assembly}.minced/{assembly}.crisprs.gff",
         outdir = lambda wildcards, output: os.path.dirname(output.txt),
         account=config["project"]
     conda:

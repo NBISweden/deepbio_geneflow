@@ -17,3 +17,11 @@ properties:
     type: integer
     description: number of reads to generate for test data
     default: 10000
+  megahit:
+    type: object
+    default:
+      k: [21,29,39,59,79,99,119,141]
+    properties:
+      k:
+        type: array
+        description: kmer sizes to use for megahit

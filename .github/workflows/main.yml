@@ -39,7 +39,6 @@ jobs:
       run: |
         snakemake --use-conda -j 8 -p results/scapp/test/test.confident_cycs.fasta
         snakemake --use-conda -j 8 -p results/recycler/test/test.cycs.fasta
-        snakemake --use-conda -j 8 -p results/mpspades/test/contigs.fasta.gz
       env:
         TMPDIR: /tmp
     - name: Generate plasmids report
@@ -47,7 +46,6 @@ jobs:
       env:
         SCA: results/scapp/test/test.confident_cycs.fasta
         REC: results/recycler/test/test.cycs.fasta
-        MPS: results/mpspades/test/contigs.fasta.gz
     - name: Upload plasmids report
       uses: actions/upload-artifact@v1
       with:

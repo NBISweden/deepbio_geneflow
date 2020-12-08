@@ -1,3 +1,6 @@
 project: snic2017-7-182
 # sample list
 sample_list: config/samples.tsv
+# megahit params
+megahit:
+  k: [21,29,39,59,79,99,119,141]

@@ -37,9 +37,20 @@ genome (generated with `randomreads.sh`) + 50k reads subsampled from a
  ## Tools and outline
  ### Plasmids
 
-- [MetaplasmidSPADES](https://github.com/ablab/spades/tree/metaplasmid_3.13.0) ([Antipov et al 2019](https://genome.cshlp.org/content/29/6/961))
 - [SCAPP](https://github.com/Shamir-Lab/SCAPP) ([Pellow et al 2020](https://www.biorxiv.org/content/10.1101/2020.01.12.903252v3))
+  
+  SCAPP (Sequence Contents-Aware Plasmid Peeler) also uses the assembly graph output together with
+  plasmid-specific gene detection and scoring of putative plasmids.
+
 - [Recycler](https://github.com/Shamir-Lab/Recycler) ([Rozov et al 2016](https://academic.oup.com/bioinformatics/article/33/4/475/2623362))
+  
+  Recycler also uses assembly graphs + read-mapping and coverage information to identify 
+  putative plasmids but does not use plasmid-specific genes.
+  
+- [PPR-Meta](https://github.com/zhenchengfang/PPR-Meta) ([Fang et al 2019](https://academic.oup.com/gigascience/article/8/6/giz066/5521157))
+  
+  PPR-Meta uses deep learning methods to identify phages and plasmid sequences in 
+  metagenomic assemblies.
 
 ### Phages
 - [Virsorter](https://github.com/simroux/VirSorter) ([Roux et al 2015](https://peerj.com/articles/985/))
@@ -52,14 +63,6 @@ genome (generated with `randomreads.sh`) + 50k reads subsampled from a
   > for fragmented genomes, *category 3* predictions help recover more viral 
   >sequences, but do so at the cost of increased false-positives.
 
-- [MetaviralSPADES](https://github.com/ablab/spades/tree/metaviral_publication) ([Antipov et al 2020](https://academic.oup.com/bioinformatics/article-abstract/36/14/4126/5837667))
-  
-  MetaviralSPADES is essentially a modified version of the MetaSPADES assembler
-  that looks for viral contigs in the MetaSPADES assembly graph using 
-  differences in coverage. Further steps include *viralVerify* and 
-  *viralComplete* to verify contigs and check viral genome completeness 
-  respectively.
-  
 - [MARVEL](https://github.com/LaboratorioBioinformatica/MARVEL) ([Amgarten et al 2018](https://www.frontiersin.org/articles/10.3389/fgene.2018.00304/full)) 
   
   Marvel uses a random forest classifier to classify metagenomic bins as 
@@ -75,8 +78,8 @@ genome (generated with `randomreads.sh`) + 50k reads subsampled from a
   VIBRANT uses machine learning (neural networks) based on annotation
   metrics derived from HMM searches against KEGG, PFAM AND [VOG](http://vogdb.org/).  
 
-### CRISPR
-- [Minced](https://github.com/ctSkennerton/minced)
+### CRISPRs
+#### [Minced](https://github.com/ctSkennerton/minced)
 
 ### Genome Islands
 - Benchmarking shows that assembly + binning underperforms for plasmids and GIs: 

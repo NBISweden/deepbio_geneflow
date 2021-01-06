@@ -34,6 +34,11 @@ comprised of 50k reads from the `minced` testdata of the *Aquifex aeolicus* VF5
 genome (generated with `randomreads.sh`) + 50k reads subsampled from a 
 [synthetic mock]() metagenome (using `seqtk`).
  
+## Running the workflow
+```bash
+snakemake --use-conda -j 10 -rpk --profile slurm --configfile config/deepbio_config.yaml
+```
+
  ## Tools and outline
  ### Plasmids
 

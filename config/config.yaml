@@ -1,3 +1,4 @@
+project: snic2017-7-182
 # sample list
 sample_list: config/samples.tsv
 # megahit params

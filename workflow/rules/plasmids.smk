@@ -85,7 +85,7 @@ rule scapp:
         
         # Get k-max
         files=$(ls {params.indir}/intermediate_contigs/*.final.contigs.fa)
-        k=$(basename $files | cut -f1 -d '.' | sed 's/k//g' | sort -n | tail -n 1)
+        k=$(basename -a $files | cut -f1 -d '.' | sed 's/k//g' | sort -n | tail -n 1)
         
         # Run SCAPP
         scapp -p {threads} -g {input.fastg} -k $k -b {input.bam} -o {params.outdir} > {log} 2>&1
@@ -98,7 +98,7 @@ rule scapp:
 
 rule recycler:
     input:
-        graph = "results/assembly/{assembly}/assembly_graph.fastg",
+        graph = "results/assembly/{assembly}/final.contigs.fastg",
         bam = "results/assembly/{assembly}/reads_pe_primary.sort.bam",
         bai = "results/assembly/{assembly}/reads_pe_primary.sort.bam.bai"
     output:
@@ -112,6 +112,7 @@ rule recycler:
     params:
         account=config["project"],
         tmp = "$TMPDIR/{assembly}.recycler",
+        indir = lambda wildcards, input: os.path.dirname(input.graph),
         outdir = lambda wildcards, output: os.path.dirname(output[0]),
         graph = "$TMPDIR/{assembly}.recycler/{assembly}.fastg"
     conda:
@@ -122,7 +123,7 @@ rule recycler:
         
         # Get k-max
         files=$(ls {params.indir}/intermediate_contigs/*.final.contigs.fa)
-        k=$(basename $files | cut -f1 -d '.' | sed 's/k//g' | sort -n | tail -n 1)
+        k=$(basename -a $files | cut -f1 -d '.' | sed 's/k//g' | sort -n | tail -n 1)
         
         recycle.py -g {input.graph} -k $k -b {input.bam} \
             -o {params.outdir} > {log} 2>&1

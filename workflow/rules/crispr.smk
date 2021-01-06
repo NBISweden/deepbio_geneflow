@@ -20,10 +20,8 @@ rule minced:
         """
         # Create tmpdir
         mkdir -p {params.tmp}
-        # Unzip fasta file
-        gunzip -c {input[0]} > {params.fa}
         # Run minced
-        minced {params.fa} {params.txt} {params.gff}
+        minced {input} {params.txt} {params.gff}
         # Sync output and clean up
         gzip {params.txt} {params.gff}
         mv {params.tmp}/*.gz {params.outdir}

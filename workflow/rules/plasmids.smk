@@ -30,7 +30,7 @@ rule bowtie2:
         "results/assembly/{assembly}/reads_pe_primary.sort.bam",
         "results/assembly/{assembly}/reads_pe_primary.sort.bam.bai"
     log:
-        "results/logs/plasmids/{assembly}.bwa.log"
+        "results/logs/plasmids/{assembly}.bowtie2.log"
     params:
         account=config["project"],
         tmp = "$TMPDIR/{assembly}.bowtie",

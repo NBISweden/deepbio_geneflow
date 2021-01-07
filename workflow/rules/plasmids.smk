@@ -16,7 +16,7 @@ rule bowtie_index:
     threads: 10
     shell:
         """
-        bowtie2-build -t {threads} --large-index {input} {params.prefix} 2>&log
+        bowtie2-build -t {threads} --large-index {input} {params.prefix} 2>{log}
         """
 
 rule bowtie2:

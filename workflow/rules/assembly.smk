@@ -45,7 +45,7 @@ rule fasta2fastg:
         files=$(ls {params.indir}/intermediate_contigs/*.final.contigs.fa)
         k=$(basename -a $files | cut -f1 -d '.' | sed 's/k//g' | sort -n | tail -n 1)
         # Convert to fastg format
-        megahit_toolkit contig2fastg $k {params.indir}/intermediate_contigs/$k.contigs.fa > {output[0]}
+        megahit_toolkit contig2fastg $k {params.indir}/intermediate_contigs/k$k.contigs.fa > {output[0]}
         """
 
 rule symlink_fasta:

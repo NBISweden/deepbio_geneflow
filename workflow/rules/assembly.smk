@@ -43,7 +43,7 @@ rule fasta2fastg:
         """
         # Get k-max from log
         files=$(ls {params.indir}/intermediate_contigs/*.final.contigs.fa)
-        k=$(basename $files | cut -f1 -d '.' | sed 's/k//g' | sort -n | tail -n 1)
+        k=$(for f in $files; do basename $f; done | cut -f1 -d '.' | sed 's/k//g' | sort -n | tail -n 1)
         # Convert to fastg format
         megahit_toolkit contig2fastg $k {params.indir}/intermediate_contigs/$k.contigs.fa > {output[0]}
         # Symlink corresponding fasta file

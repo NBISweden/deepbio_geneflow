@@ -1,7 +1,8 @@
 from scripts.common import get_assembly_files
 
 localrules:
-    fasta2fastg
+    fasta2fastg,
+    symlink_fasta
 
 rule megahit:
     input:
@@ -34,8 +35,7 @@ rule fasta2fastg:
     input:
         "results/assembly/{assembly}/final.contigs.fa"
     output:
-        "results/assembly/{assembly}/final.contigs.fastg",
-        "results/assembly/{assembly}/assembly_graph.nodes.fasta"
+        "results/assembly/{assembly}/final.contigs.fastg"
     params:
         indir = lambda wildcards, input: os.path.dirname(input[0])
     conda: "../envs/megahit.yaml"
@@ -46,6 +46,20 @@ rule fasta2fastg:
         k=$(basename -a $files | cut -f1 -d '.' | sed 's/k//g' | sort -n | tail -n 1)
         # Convert to fastg format
         megahit_toolkit contig2fastg $k {params.indir}/intermediate_contigs/$k.contigs.fa > {output[0]}
+        """
+
+rule symlink_fasta:
+    input:
+        "results/assembly/{assembly}/final.contigs.fa"
+    output:
+        "results/assembly/{assembly}/assembly_graph.nodes.fasta"
+    params:
+        indir=lambda wildcards, input: os.path.dirname(input[0])
+    shell:
+        """
+        # Get k-max from log
+        files=$(ls {params.indir}/intermediate_contigs/*.final.contigs.fa)
+        k=$(basename -a $files | cut -f1 -d '.' | sed 's/k//g' | sort -n | tail -n 1)
         # Symlink corresponding fasta file
-        ln -s $(pwd)/{params.indir}/intermediate_contigs/k$k.contigs.fa {output[1]}
+        ln -s $(pwd)/{params.indir}/intermediate_contigs/k$k.contigs.fa {output[0]}
         """

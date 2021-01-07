@@ -16,7 +16,7 @@ rule bowtie_index:
     threads: 10
     shell:
         """
-        bowtie2-build -t {threads} --large-index {input} {params.prefix} 2>{log}
+        bowtie2-build -t {threads} --large-index {input} {params.prefix} >{log} 2>{log}
         """
 
 rule bowtie2:
@@ -45,7 +45,7 @@ rule bowtie2:
         """
         mkdir -p {params.tmp}
                 
-        # Map with bwa
+        # Map with bowtie2
         bowtie2 --very-sensitive -x {params.prefix} -p {threads} -1 {input.R1} -2 {input.R2} 2>{log} | \
             samtools view -buS - | samtools view -bF 0x0900 - | \
             samtools sort - > {params.tmp}/reads_pe_primary.sort.bam 

@@ -119,8 +119,6 @@ rule recycler:
         "../envs/recycler.yaml"
     shell:
         """
-        mkdir -p {params.tmp}
-        
         # Get k-max
         files=$(ls {params.indir}/intermediate_contigs/*.final.contigs.fa)
         k=$(basename -a $files | cut -f1 -d '.' | sed 's/k//g' | sort -n | tail -n 1)

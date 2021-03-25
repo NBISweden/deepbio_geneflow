@@ -22,7 +22,7 @@ rule megahit:
         "../envs/megahit.yaml"
     threads: 20
     resources:
-        runtime = lambda wildcards, attempt: attempt**2*60*10
+        runtime = lambda wildcards, attempt: attempt**2*60*48
     shell:
         """
         rm -rf {params.outdir}

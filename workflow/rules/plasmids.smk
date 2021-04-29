@@ -94,7 +94,8 @@ rule scapp:
         then
             echo "NO PLASMIDS FOUND" > {output[0]}
         fi 
-        mv {params.tmpdir}/* {params.outdir}/
+        rsync -q -azv {params.tmpdir}/* {params.outdir}/
+        rm -r {params.tmpdir}
         """
 
 rule recycler:

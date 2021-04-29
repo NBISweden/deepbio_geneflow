@@ -62,14 +62,14 @@ rule scapp:
         bam = "results/assembly/{assembly}/reads_pe_primary.sort.bam",
         bai = "results/assembly/{assembly}/reads_pe_primary.sort.bam.bai"
     output:
-        report(touch("results/scapp/{assembly}/{assembly}.confident_cycs.fasta"),
+        report("results/scapp/{assembly}/final.contigs.confident_cycs.fasta",
                caption="../report/scapp.rst", category = "Plasmids",
                subcategory="SCAPP")
     log:
         "results/logs/plasmids/{assembly}.scapp.log"
     conda:
         "../envs/scapp.yaml"
-    threads: 4
+    threads: 10
     resources:
         runtime = lambda wildcards, attempt: attempt**2*60*4
     params:
@@ -88,12 +88,13 @@ rule scapp:
         k=$(basename -a $files | cut -f1 -d '.' | sed 's/k//g' | sort -n | tail -n 1)
         
         # Run SCAPP
-        scapp -p {threads} -g {input.fastg} -k $k -b {input.bam} -o {params.outdir} > {log} 2>&1
+        scapp -p {threads} -g {input.fastg} -k $k -b {input.bam} -o {params.tmpdir} > {log} 2>&1
         exitcode=$?
         if [ $exitcode -eq 1 ]
         then
             echo "NO PLASMIDS FOUND" > {output[0]}
         fi 
+        mv {params.tmpdir}/* {params.outdir}/
         """
 
 rule recycler:
@@ -102,13 +103,14 @@ rule recycler:
         bam = "results/assembly/{assembly}/reads_pe_primary.sort.bam",
         bai = "results/assembly/{assembly}/reads_pe_primary.sort.bam.bai"
     output:
-        touch(report("results/recycler/{assembly}/{assembly}.cycs.fasta",
+        report("results/recycler/{assembly}/final.contigs.cycs.fasta",
                      caption="../report/recycler.rst", category = "Plasmids",
-                     subcategory="Recycler"))
+                     subcategory="Recycler")
     log:
         "results/logs/plasmids/{assembly}.recycler.log"
     resources:
         runtime = lambda wildcards, attempt: attempt**2*60*4
+    threads: 4
     params:
         account=config["project"],
         tmp = "$TMPDIR/{assembly}.recycler",
@@ -124,5 +126,6 @@ rule recycler:
         k=$(basename -a $files | cut -f1 -d '.' | sed 's/k//g' | sort -n | tail -n 1)
         
         recycle.py -g {input.graph} -k $k -b {input.bam} \
-            -o {params.outdir} > {log} 2>&1
+            -o {params.tmp} > {log} 2>&1
+        mv {params.tmp}/* {params.outdir}/
         """
